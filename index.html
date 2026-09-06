@@ -444,6 +444,29 @@
 
     .btn-submit-onboarding:hover { opacity: 0.9; }
 
+    /* MENU HAMBÚRGUER MOBILE */
+    .mobile-topbar {
+      display: none;
+      width: 100%;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
     @media (max-width: 1024px) {
       .form-grid { grid-template-columns: repeat(2, 1fr); }
       .grid-cards { grid-template-columns: repeat(2, 1fr); }
@@ -451,16 +474,21 @@
 
     @media (max-width: 768px) {
       .app-container { flex-direction: column; }
+      .mobile-topbar { display: flex; }
       .sidebar {
         width: 100%;
+        display: none;
+        position: fixed;
+        top: 57px;
+        left: 0;
+        height: calc(100vh - 57px);
+        z-index: 999;
+        overflow-y: auto;
+        background-color: var(--card-bg);
         border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px 15px;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
         box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       }
+      .sidebar.open { display: flex; }
       .main-content { padding: 20px 15px; }
       .form-grid { grid-template-columns: 1fr; }
       .grid-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -571,13 +599,20 @@
           <label for="ob-lgpd">Concordo em receber comunicações, treinamentos e ofertas exclusivas do Grupo Altus Educacional.</label>
         </div>
 
-        <button type="submit" class="btn-submit-onboarding" id="btn-salvar-ob">🚀 LIBERAR MEU RADAR GRATUITO</button>
+        <button type="submit" class="btn-submit-onboarding" id="btn-salvar-ob">🚀 LIBERAR MEU RADAR (R$ 47,00)</button>
       </form>
     </div>
   </div>
 
+  <!-- Barra Superior Mobile com Menu Hambúrguer -->
+  <div class="mobile-topbar" id="mobile-topbar-header">
+    <button class="hamburger-btn" onclick="toggleSidebarMobile()">☰</button>
+    <span style="font-weight: bold; color: var(--accent-orange); font-size: 0.95rem;">Radar 10K+</span>
+    <div style="width: 32px;"></div>
+  </div>
+
   <div class="app-container">
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar-menu">
       <div class="sidebar-top">
         <div class="brand-container" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
           <img src="logo.png" alt="Logo Radar 10K+" class="brand-logo" onerror="this.style.display='none'">
@@ -702,6 +737,12 @@
   <script>
     const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx1gqcdz3eCkLRn3uT421BgUXMqskEFf9R5DAuCMfgpmTt2z4Ej_YU3xK0Mk8Q-cLd2zA/exec";
     let pwaPromptEvent = null;
+
+    // CONTROLE DO MENU HAMBÚRGUER MOBILE
+    function toggleSidebarMobile() {
+      const sidebar = document.getElementById('sidebar-menu');
+      if (sidebar) sidebar.classList.toggle('open');
+    }
 
     // CONTROLE DE MINIMIZAR / EXPANDIR O BANNER DE UPGRADE
     function minimizarCTA() {
@@ -845,7 +886,7 @@
       } catch (err) {
         alert("Erro ao conectar. Tente novamente.");
         btn.disabled = false;
-        btn.innerText = "🚀 LIBERAR MEU RADAR GRATUITO";
+        btn.innerText = "🚀 Controlar meu Salário!";
       }
     }
 
