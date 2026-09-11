@@ -1,39 +1,1340 @@
-const CACHE_NAME = 'radar-vendedor-rico-v2';
-const urlsToCache = [
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Radar do Vendedor Rico — Planejador de Metas — Altus Educacional</title>
+  
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-512.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Radar do Vendedor Rico">
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-  self.skipWaiting();
-});
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent-orange: #f97316;
+      --accent-blue: #3b82f6;
+      --accent-yellow: #eab308;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
+    body.light-theme {
+      --bg-dark: #f1f5f9;
+      --card-bg: #ffffff;
+      --accent-orange: #ea580c;
+      --accent-blue: #2563eb;
+      --accent-yellow: #ca8a04;
+      --accent-red: #dc2626;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    input, select, textarea {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* TELA DE AUTENTICAÇÃO / LOGIN */
+    #auth-screen {
+      display: flex; height: 100vh; width: 100vw; background-color: var(--bg-dark); color: var(--text-main);
+      flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: fixed; top: 0; left: 0; z-index: 9999;
+    }
+
+    .auth-card {
+      background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 35px 25px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .auth-logo { max-height: 80px; margin-bottom: 15px; object-fit: contain; }
+    .auth-card h2 { color: var(--accent-orange); font-size: 1.4rem; margin-bottom: 8px; }
+    .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; line-height: 1.4; }
+    .auth-input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .auth-input-group input { text-align: center; font-size: 1rem; }
+    .btn-auth { background-color: var(--accent-orange); color: #fff; font-weight: 700; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; }
+    #auth-msg { margin-top: 15px; font-size: 0.85rem; font-weight: 600; display: none; }
+    .msg-error { color: var(--accent-red); }
+
+    .app-container {
+      display: none;
+      flex-direction: row;
+      min-height: 100vh;
+      width: 100vw;
+    }
+
+    .sidebar {
+      width: 280px;
+      background-color: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex-shrink: 0;
+      justify-content: space-between;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .brand-logo {
+      max-height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      color: var(--accent-orange);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-action-sidebar {
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-align: center;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .btn-install-pwa {
+      background: var(--accent-orange);
+      color: #fff;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-install-pwa:hover { opacity: 0.9; }
+
+    /* BANNER CTA REATIVO & MINIMIZÁVEL */
+    .banner-cta {
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px dashed var(--accent-orange);
+      padding: 18px;
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .banner-cta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .banner-cta h4 {
+      margin: 0;
+      color: var(--accent-orange);
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .btn-minimize-cta {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-muted);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .btn-minimize-cta:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    .banner-cta p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 0 0 14px 0;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .btn-upgrade {
+      display: block;
+      background-color: var(--accent-orange);
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.85rem;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+
+    .btn-upgrade:hover { opacity: 0.9; }
+
+    .btn-minimized-upgrade {
+      display: none;
+      background: var(--accent-orange);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+      animation: pulseBtn 2s infinite;
+      margin-top: 10px;
+      text-align: center;
+      width: 100%;
+    }
+
+    @keyframes pulseBtn {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 35px 40px;
+      overflow-y: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    h1 { margin-top: 0; font-size: 1.8rem; }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      color: var(--accent-orange);
+      margin-bottom: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-container {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 35px;
+      transition: background-color 0.3s;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-field label a {
+      font-size: 0.75rem;
+      color: var(--accent-orange);
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: normal;
+    }
+
+    .input-field small {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.8;
+      line-height: 1.2;
+    }
+
+    input, select {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      width: 100%;
+      height: 48px;
+    }
+
+    input:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 35px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 120px;
+      transition: background-color 0.3s;
+    }
+
+    .card h4 {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .card .val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .card .val.orange { color: var(--accent-orange); }
+    .card .val.blue { color: var(--accent-blue); }
+    .card .val.yellow { color: var(--accent-yellow); }
+
+    .card small { color: var(--text-muted); font-size: 0.75rem; }
+
+    /* ABAS INTERNAS PARA A SEÇÃO DE DICAS DE USO */
+    .sub-nav { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+    .sub-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 14px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; flex: 1; min-width: 200px; text-align: center; }
+    .sub-btn.active { background: var(--accent-orange); color: #fff; border-color: var(--accent-orange); }
+
+    .tip-card { background: var(--card-bg); border-left: 4px solid var(--accent-orange); padding: 20px; margin-bottom: 20px; border-radius: 0 12px 12px 0; border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+    .tip-card h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--accent-orange); }
+    .tip-card p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 10px 0; }
+    .tip-example { background: rgba(249, 115, 22, 0.08); padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; color: var(--text-main); font-weight: 500; }
+
+    /* CTA NATIVO NA ABA DE DICAS */
+    .dicas-cta-box {
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(59, 130, 246, 0.15));
+      border: 2px solid var(--accent-orange);
+      border-radius: 14px;
+      padding: 30px;
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    .dicas-cta-box h3 { color: var(--accent-orange); font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; }
+    .dicas-cta-box p { color: var(--text-main); font-size: 0.95rem; max-width: 600px; margin: 0 auto 20px auto; line-height: 1.5; }
+    .btn-dicas-cta {
+      display: inline-block;
+      background: var(--accent-orange);
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+      transition: opacity 0.2s;
+    }
+    .btn-dicas-cta:hover { opacity: 0.9; }
+
+    .app-footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(8px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--accent-orange);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 540px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: auto;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      margin: 0;
+      color: var(--accent-orange);
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--accent-orange);
+      cursor: pointer;
+    }
+
+    .checkbox-container label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+      cursor: pointer;
+    }
+
+    .btn-submit-onboarding {
+      background: var(--accent-orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-submit-onboarding:hover { opacity: 0.9; }
+
+    /* MENU HAMBÚRGUER MOBILE */
+    .mobile-topbar {
+      display: none;
+      width: 100%;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    @media (max-width: 1024px) {
+      .form-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-cards { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .app-container { flex-direction: column; }
+      .mobile-topbar { display: flex; }
+      .sidebar {
+        width: 100%;
+        display: none;
+        position: fixed;
+        top: 57px;
+        left: 0;
+        height: calc(100vh - 57px);
+        z-index: 999;
+        overflow-y: auto;
+        background-color: var(--card-bg);
+        border-right: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      }
+      .sidebar.open { display: flex; }
+      .main-content { padding: 20px 15px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .grid-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card .val { font-size: 1.3rem; }
+      .modal-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE AUTENTICAÇÃO / LOGIN -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <img src="icon-192.png" alt="Logo Radar do Vendedor Rico" class="auth-logo" onerror="this.style.display='none'">
+      <h2>RADAR VENDEDOR RICO</h2>
+      <p id="auth-subtitle">Digite seu e-mail e senha de acesso para entrar.</p>
+      
+      <div class="auth-input-group" id="group-login">
+        <input type="email" id="input-login-email" placeholder="seu-email@exemplo.com" required>
+        <input type="password" id="input-login-senha" placeholder="Sua senha de acesso" onkeydown="tratarTeclaLogin(event)" required>
+        <button class="btn-auth" id="btn-login" onclick="validarEEntrar()">Entrar no Aplicativo</button>
+        
+        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem;">
+          <a href="#" onclick="abrirEsqueciSenha(event)" style="color: var(--text-muted); text-decoration: none;">Esqueci minha senha</a>
+          <a href="#" onclick="abrirCadastro(event)" style="color: var(--accent-orange); font-weight: bold; text-decoration: none;">Novo por aqui? <i>Cadastre-se</i></a>
+        </div>
+      </div>
+
+      <div class="auth-input-group" id="group-criacao-senha" style="display: none;">
+        <p style="font-size: 0.82rem; color: var(--accent-yellow); margin-bottom: 5px;">Informe seu e-mail cadastrado e crie sua senha:</p>
+        <input type="email" id="input-cad-email" placeholder="Seu melhor e-mail">
+        <input type="password" id="input-nova-senha" placeholder="Crie sua senha (mín. 6 dígitos)">
+        <input type="password" id="input-confirma-senha" placeholder="Confirme a nova senha">
+        <button class="btn-auth" onclick="salvarPrimeiraSenha()">Cadastrar e Entrar</button>
+        <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Já tenho cadastro</a>
+      </div>
+
+      <div class="auth-input-group" id="group-recuperacao" style="display: none;">
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Enviaremos as instruções pelo e-mail oficial <b>suporte.rp@altusedu.com.br</b>.</p>
+        <input type="email" id="input-recup-email" placeholder="Confirme seu e-mail">
+        <button class="btn-auth" onclick="enviarSolicitacaoRecuperacao()">Enviar Solicitação de Recuperação</button>
+        <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Voltar ao Login</a>
+      </div>
+
+      <div id="auth-msg" style="margin-top: 15px; font-size: 0.85rem; display: none;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ONBOARDING (SEM O CAMPO REDUNDANTE DE E-MAIL) -->
+  <div class="modal-overlay" id="modal-onboarding" style="display: none;">
+    <div class="modal-card">
+      <h3>📡 Perfil Comercial & Metas</h3>
+      <p>Preencha seus dados de perfil uma única vez para liberar suas calculadoras e simuladores de metas comerciais:</p>
+      
+      <form id="form-onboarding" onsubmit="salvarOnboarding(event)" style="display: flex; flex-direction: column; gap: 14px;">
+        
+        <div class="input-field">
+          <label for="ob-nome">Nome Completo *</label>
+          <input type="text" id="ob-nome" required placeholder="Seu nome completo">
+        </div>
+
+        <div class="modal-grid">
+          <div class="input-field">
+            <label for="ob-email-display">E-mail Cadastrado (Bloqueado)</label>
+            <input type="email" id="ob-email-display" disabled style="background-color: var(--border-color); color: var(--text-muted);">
+          </div>
+          <div class="input-field">
+            <label for="ob-telefone">WhatsApp (DDD) *</label>
+            <input type="tel" id="ob-telefone" required placeholder="(99) 99999-9999" oninput="mascaraTelefone(this)">
+          </div>
+        </div>
+
+        <div class="modal-grid">
+          <div class="input-field">
+            <label for="ob-cidade">Cidade *</label>
+            <input type="text" id="ob-cidade" required placeholder="Ex: São Paulo">
+          </div>
+          <div class="input-field">
+            <label for="ob-estado">Estado *</label>
+            <select id="ob-estado" required>
+              <option value="">UF</option>
+              <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+              <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+              <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+              <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+              <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+              <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+              <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+              <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+              <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-field">
+          <label for="ob-segmento">Segmento Comercial de Atuação *</label>
+          <select id="ob-segmento" required onchange="checarSegmentoOutro(this)">
+            <option value="">Selecione seu segmento...</option>
+            <option value="Servicos Financeiros, Seguros & Consorcios">Serviços Financeiros, Seguros & Consórcios</option>
+            <option value="Mercado Imobiliario & Construcao Civil">Mercado Imobiliário & Construção Civil</option>
+            <option value="Automotivo & Concessionarias">Automotivo & Concessionárias</option>
+            <option value="Tecnologia, Software (SaaS) & Telecom">Tecnologia, Software (SaaS) & Telecom</option>
+            <option value="Varejo, Atacado & Bens de Consumo">Varejo, Atacado & Bens de Consumo</option>
+            <option value="Agronegocio, Maquinas & Equipamentos">Agronegócio, Máquinas & Equipamentos</option>
+            <option value="Saude, Estetica & Farmaceutica">Saúde, Estética & Farmacêutica</option>
+            <option value="Educacao, Cursos & Infoprodutos">Educação, Cursos & Infoprodutos</option>
+            <option value="Energia Solar & Solucoes Sustentaveis">Energia Solar & Soluções Sustentáveis</option>
+            <option value="Industria & Maquinas Industriais">Indústria & Máquinas Industriais</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <div class="input-field" id="box-segmento-outro" style="display: none;">
+          <label for="ob-segmento-outro">Especifique seu segmento (máx. 100 caracteres)</label>
+          <input type="text" id="ob-segmento-outro" maxlength="100" placeholder="Digite seu segmento comercial">
+        </div>
+
+        <div class="modal-grid">
+          <div class="input-field">
+            <label for="ob-faixa-renda">Faixa de Renda Mensal *</label>
+            <select id="ob-faixa-renda" required>
+              <option value="">Selecione...</option>
+              <option value="Ate R$ 3.000,00">Até R$ 3.000,00</option>
+              <option value="De R$ 3.000,01 a R$ 5.000,00">De R$ 3.000,01 a R$ 5.000,00</option>
+              <option value="De R$ 5.000,01 a R$ 10.000,00">De R$ 5.000,01 a R$ 10.000,00</option>
+              <option value="Acima de R$ 10.000,00">Acima de R$ 10.000,00</option>
+            </select>
+          </div>
+
+          <div class="input-field">
+            <label for="ob-comissao">Comissão Média *</label>
+            <select id="ob-comissao" required>
+              <option value="">Selecione...</option>
+              <option value="Menos que 1%">Menos que 1%</option>
+              <option value="Entre 1% e 3%">Entre 1% e 3%</option>
+              <option value="Entre 3% e 5%">Entre 3% e 5%</option>
+              <option value="Entre 5% e 10%">Entre 5% e 10%</option>
+              <option value="Entre 10% e 15%">Entre 10% e 15%</option>
+              <option value="Entre 15% e 30%">Entre 15% e 30%</option>
+              <option value="Maior que 30%">Maior que 30%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="ob-lgpd" required checked>
+          <label for="ob-lgpd">Concordo em receber comunicações, treinamentos e ofertas exclusivas do Grupo Altus Educacional.</label>
+        </div>
+
+        <button type="submit" class="btn-submit-onboarding" id="btn-salvar-ob">🚀 CONTROLAR O MEU SALÁRIO!</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Barra Superior Mobile com Menu Hambúrguer -->
+  <div class="mobile-topbar" id="mobile-topbar-header">
+    <button class="hamburger-btn" onclick="toggleSidebarMobile()">☰</button>
+    <span style="font-weight: bold; color: var(--accent-orange); font-size: 0.95rem;">Radar do Vendedor Rico</span>
+    <div style="width: 32px;"></div>
+  </div>
+
+  <div class="app-container" id="app-main-content">
+    <div class="sidebar" id="sidebar-menu">
+      <div class="sidebar-top">
+        <div class="brand-container" onclick="mostrarAba('planejador')">
+          <img src="icon-192.png" alt="Logo Radar do Vendedor Rico" class="brand-logo" onerror="this.style.display='none'">
+          <div class="brand-title">RADAR VENDEDOR RICO</div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn-action-sidebar" id="btn-menu-planejador" onclick="mostrarAba('planejador')">📊 Planejador de Metas</button>
+          <button class="btn-action-sidebar" id="btn-menu-dicas" onclick="mostrarAba('dicas')">💡 Dicas de Uso</button>
+        </div>
+
+        <!-- Botão de Instalação Direta PWA -->
+        <button class="btn-install-pwa" id="btn-install-pwa" style="display: none;" onclick="instalarAppPWA()">📲 Instalar Aplicativo</button>
+        
+        <button class="btn-action-sidebar" onclick="toggleTheme()" id="btn-theme-text">☀️ Modo Claro</button>
+      </div>
+
+      <div>
+        <div class="banner-cta" id="box-banner-cta">
+          <div class="banner-cta-header">
+            <h4>🚀 Radar PRO</h4>
+            <button class="btn-minimize-cta" onclick="minimizarCTA()" title="Minimizar">✕</button>
+          </div>
+          <p>Tenha o CRM exclusivo do vendedor com lançamentos ilimitados, controle de comissões pendentes, simulação de descontos, exportação para Excel e sincronização na nuvem por apenas R$ 19,37/ Mês!</p>
+          <a href="https://sun.eduzz.com/8WPND45N0P" class="btn-upgrade" target="_blank">💲 Assinar o Radar PRO!</a>
+        </div>
+
+        <button class="btn-minimized-upgrade" id="btn-minimized-cta" onclick="expandirCTA()">🚀 Fazer Upgrade (Radar PRO)</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="content-body">
+        
+        <!-- ABA 1: PLANEJADOR DE METAS -->
+        <div id="aba-planejador" class="aba-content">
+          <h1>Calculadora & Planejador de Metas</h1>
+          <p class="subtitle">Preencha seus dados de entrada para descobrir exatamente quanto você precisa vender e atender por dia para bater sua meta!</p>
+
+          <div class="section-title">✏️ 1. Dados de Entrada</div>
+          <div class="form-container">
+            <div class="form-grid">
+              
+              <div class="input-field">
+                <label for="salario-pretendido">Salário Pretendido Total (R$)</label>
+                <input type="text" id="salario-pretendido" inputmode="decimal" value="R$ 10.000,00" oninput="mascaraMoedaInput(this); calcularPlanejamento()">
+                <small>Quanto você quer colocar no bolso no mês</small>
+              </div>
+
+              <div class="input-field">
+                <label for="salario-fixo">Salário Fixo / Ajuda de Custo (R$)</label>
+                <input type="text" id="salario-fixo" inputmode="decimal" value="R$ 2.000,00" oninput="mascaraMoedaInput(this); calcularPlanejamento()">
+                <small>Seu fixo CLT ou ajuda de custo (0 se for 100% comissão)</small>
+              </div>
+
+              <div class="input-field">
+                <label for="comissao-media">Comissão Média (%)</label>
+                <input type="number" id="comissao-media" inputmode="decimal" value="5" step="any" oninput="calcularPlanejamento()">
+                <small>Percentual médio recebido sobre as vendas</small>
+              </div>
+
+              <div class="input-field">
+                <label for="taxa-conversao-media">
+                  Taxa de Conversão Média (%)
+                  <a onclick="mostrarAba('dicas')">o que é isso?</a>
+                </label>
+                <input type="number" id="taxa-conversao-media" inputmode="decimal" value="10" step="any" oninput="calcularPlanejamento()">
+                <small>De 100 clientes atendidos, quantos compram?</small>
+              </div>
+
+              <div class="input-field">
+                <label for="ticket-medio">
+                  Ticket Médio por Venda (R$)
+                  <a onclick="mostrarAba('dicas')">o que é isso?</a>
+                </label>
+                <input type="text" id="ticket-medio" inputmode="decimal" value="R$ 500,00" oninput="mascaraMoedaInput(this); calcularPlanejamento()">
+                <small>Valor médio das vendas realizadas</small>
+              </div>
+
+              <div class="input-field">
+                <label for="dias-trabalhados">Dias Trabalhados no Mês</label>
+                <input type="number" id="dias-trabalhados" inputmode="numeric" value="22" oninput="calcularPlanejamento()">
+                <small>Dias úteis de vendas no mês</small>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="section-title">📊 2. Resultados & Metas Necessárias</div>
+          <div class="grid-cards">
+            
+            <div class="card">
+              <h4>Meta de Comissão (R$)</h4>
+              <div class="val orange" id="res-meta-comissao">R$ 0,00</div>
+              <small>Valor necessário de comissão</small>
+            </div>
+
+            <div class="card">
+              <h4>Faturamento / Vendas (R$)</h4>
+              <div class="val blue" id="res-meta-faturamento">R$ 0,00</div>
+              <small>Faturamento total necessário para atingir o salário</small>
+            </div>
+
+            <div class="card">
+              <h4>Vendas Necessárias (Mês)</h4>
+              <div class="val" id="res-vendas-mes">0</div>
+              <small>Qtd total de vendas no mês</small>
+            </div>
+
+            <div class="card">
+              <h4>Vendas / Dia</h4>
+              <div class="val yellow" id="res-vendas-dia">0,0</div>
+              <small>Média diária de vendas</small>
+            </div>
+
+            <div class="card">
+              <h4>Leads / Atendimentos (Mês)</h4>
+              <div class="val" id="res-leads-mes">0</div>
+              <small>Total de abordagens no mês</small>
+            </div>
+
+            <div class="card">
+              <h4>Leads / Atendimentos (Dia)</h4>
+              <div class="val orange" id="res-leads-dia">0</div>
+              <small>Abordagens necessárias por dia</small>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ABA 2: DICAS DE USO & FÓRMULAS -->
+        <div id="aba-dicas" class="aba-content" style="display: none;">
+          <h1>💡 Dicas de Uso & Fórmulas de Indicadores</h1>
+          <p class="subtitle">Entenda em detalhes como calculamos seus indicadores comerciais e aprenda a utilizá-los para bater suas metas.</p>
+
+          <div class="sub-nav">
+            <button class="sub-btn active" id="btn-sub-formulas" onclick="switchDicaSub('formulas', event)">📐 Fórmulas dos Indicadores</button>
+            <button class="sub-btn" id="btn-sub-estrategias" onclick="switchDicaSub('estrategias', event)">🚀 Estratégias de Crescimento</button>
+          </div>
+
+          <div id="sub-dicas-formulas">
+            <div class="tip-card">
+              <h3>💡 O que é Ticket Médio?</h3>
+              <p>O Ticket Médio representa o valor financeiro médio das vendas realizadas em um período. Ele mostra se o seu público está investindo em produtos mais robustos ou comprando itens de menor valor por pedido.</p>
+              <div class="tip-example">
+                <b>Como é calculado:</b><br>
+                Ticket Médio = Faturamento Total das Vendas ÷ Número Total de Vendas Realizadas
+                <i>Exemplo: Se você faturou R$ 10.000,00 em 20 vendas, seu Ticket Médio é de R$ 500,00.</i>
+              </div>
+            </div>
+
+            <div class="tip-card">
+              <h3>🎯 O que é Taxa de Conversão?</h3>
+              <p>A Taxa de Conversão mede a eficácia do seu atendimento e prospecção. Indica a porcentagem exata de pessoas que se tornaram compradoras em relação ao total de leads abordados.</p>
+              <div class="tip-example">
+                <b>Como é calculado:</b><br>
+                Taxa de Conversão = (Número de Vendas Realizadas ÷ Atendimentos Realizados) x 100
+                <i>Exemplo: Se você atendeu 100 interessados e fechou 10 vendas, sua Taxa de Conversão é de 10%.</i>
+              </div>
+            </div>
+          </div>
+
+          <div id="sub-dicas-estrategias" style="display: none;">
+            <div class="tip-card">
+              <h3>🚀 Como Aumentar seu Ticket Médio</h3>
+              <p>• <b>Cross-Sell:</b> Ofereça produtos ou serviços complementares antes de fechar o pedido.<br>• <b>Ancoragem de Preços:</b> Apresente três opções de pacotes (Básico, Intermediário e Premium). Os clientes tendem a escolher a opção intermediária com maior valor agregado.<br>• <b>Kits e Combos:</b> Agrupe produtos para elevar o valor percebido e conceda um pequeno incentivo no frete ou prazo.</p>
+            </div>
+            <div class="tip-card">
+              <h3>🎯 Como Aumentar sua Taxa de Conversão</h3>
+              <p>• <b>Velocidade de Resposta:</b> Responder leads nos primeiros 5 minutos aumenta drasticamente as chances de fechamento.<br>• <b>Contorno de Objeções:</b> Ouça o "vou pensar" mas faça perguntas específicas para descobrir qual é a verdadeira objeção travando a compra.<br>• <b>Garantias e Prova Social:</b> Apresente depoimentos de clientes satisfeitos para gerar confiança imediata.</p>
+            </div>
+          </div>
+
+          <!-- CTA ESTRATÉGICO PARA O RADAR PRO -->
+          <div class="dicas-cta-box">
+            <h3>📈 Quer cálculos automáticos e relatórios completos?</h3>
+            <p>Com o <b>Radar Vendedor Rico PRO</b>, você gerencia suas vendas em tempo real, controla comissões pendentes, simula descontos na hora, exporta tudo para Excel e sincroniza seus dados na nuvem com segurança.</p>
+            <a href="https://sun.eduzz.com/8WPND45N0P" target="_blank" class="btn-dicas-cta">QUERO CONHECER O RADAR PRO POR R$ 19,34/ Mês 🚀</a>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="app-footer">
+        <p>© 2026 <strong>Grupo Altus Educacional</strong>. Todos os direitos reservados.</p>
+        <p style="font-size: 0.72rem; margin-top: 4px; opacity: 0.75;">Tecnologia e Inteligência em Vendas. Proibida a reprodução parcial ou total do software.</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx1gqcdz3eCkLRn3uT421BgUXMqskEFf9R5DAuCMfgpmTt2z4Ej_YU3xK0Mk8Q-cLd2zA/exec";
+    let deferredPrompt = null;
+    let usuarioEmail = "";
+    let tentativasSenha = 0;
+
+    // CONTROLE DE ABAS DO RVR
+    function mostrarAba(abaId) {
+      document.getElementById('aba-planejador').style.display = abaId === 'planejador' ? 'block' : 'none';
+      document.getElementById('aba-dicas').style.display = abaId === 'dicas' ? 'block' : 'none';
+      
+      document.getElementById('btn-menu-planejador').style.borderColor = abaId === 'planejador' ? 'var(--accent-orange)' : 'var(--border-color)';
+      document.getElementById('btn-menu-dicas').style.borderColor = abaId === 'dicas' ? 'var(--accent-orange)' : 'var(--border-color)';
+
+      const sidebar = document.getElementById('sidebar-menu');
+      if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchDicaSub(type, ev) {
+      document.getElementById('sub-dicas-formulas').style.display = type === 'formulas' ? 'block' : 'none';
+      document.getElementById('sub-dicas-estrategias').style.display = type === 'estrategias' ? 'block' : 'none';
+      document.querySelectorAll('.sub-btn').forEach(el => el.classList.remove('active'));
+      if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+    }
+
+    // AUTENTICAÇÃO E LOGIN (PRIMEIRA TELA)
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const emailUrl = urlParams.get('aluno_id') || urlParams.get('user_id') || urlParams.get('email');
+
+      if (emailUrl && emailUrl.trim() !== '' && !emailUrl.includes('#')) {
+        usuarioEmail = emailUrl.trim().toLowerCase();
+      } else {
+        usuarioEmail = localStorage.getItem('rvr_user_email') || "";
+      }
+
+      if (usuarioEmail && usuarioEmail.includes('@')) {
+        validarEmailNuvem(usuarioEmail, true);
+      } else {
+        bloquearAcesso();
+      }
+    });
+
+    function tratarTeclaLogin(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        validarEEntrar();
+      }
+    }
+
+    function bloquearAcesso() {
+      localStorage.removeItem('rvr_user_email');
+      usuarioEmail = "";
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('app-main-content').style.display = 'none';
+      const topbar = document.getElementById('mobile-topbar-header');
+      if (topbar) topbar.style.display = 'none';
+    }
+
+    function validarEEntrar() {
+      const email = document.getElementById('input-login-email').value.trim().toLowerCase();
+      const senha = document.getElementById('input-login-senha').value;
+
+      if (!email || !email.includes('@') || !senha) {
+        exibirMensagemAuth("Preencha e-mail e senha válidos.", "msg-error");
+        return;
+      }
+
+      document.getElementById('btn-login').innerText = "Validando...";
+      document.getElementById('btn-login').disabled = true;
+
+      fetch(API_APPS_SCRIPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "validar_aluno", email: email, senha: senha }),
+        redirect: 'follow'
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('btn-login').innerText = "Entrar no Aplicativo";
+        document.getElementById('btn-login').disabled = false;
+
+        if (data.autorizado) {
+          tentativasSenha = 0;
+          usuarioEmail = email;
+          localStorage.setItem('rvr_user_email', usuarioEmail);
+          concluirLoginSucesso();
+        } else {
+          if (data.erro === "Senha incorreta.") {
+            tentativasSenha++;
+            if (tentativasSenha >= 6) {
+              alert("Muitas tentativas incorretas. Vamos enviar instruções de recuperação para o seu e-mail.");
+              abrirEsqueciSenha(new Event('click'));
+              document.getElementById('input-recup-email').value = email;
+              tentativasSenha = 0;
+              return;
+            }
+            exibirMensagemAuth(`Senha incorreta. Tentativa ${tentativasSenha} de 5.`, "msg-error");
+          } else {
+            exibirMensagemAuth(data.erro || "Credenciais inválidas.", "msg-error");
+          }
+        }
+      })
+      .catch(err => {
+        document.getElementById('btn-login').innerText = "Entrar no Aplicativo";
+        document.getElementById('btn-login').disabled = false;
+        exibirMensagemAuth("Erro ao conectar à API.", "msg-error");
+      });
+    }
+
+    function abrirCadastro(e) {
+      e.preventDefault();
+      document.getElementById('group-login').style.display = 'none';
+      document.getElementById('group-recuperacao').style.display = 'none';
+      document.getElementById('group-criacao-senha').style.display = 'flex';
+      document.getElementById('auth-subtitle').innerText = "Informe seu e-mail cadastrado e crie sua senha:";
+      esconderErroAuth();
+    }
+
+    function abrirEsqueciSenha(e) {
+      e.preventDefault();
+      document.getElementById('group-login').style.display = 'none';
+      document.getElementById('group-criacao-senha').style.display = 'none';
+      document.getElementById('group-recuperacao').style.display = 'flex';
+      document.getElementById('auth-subtitle').innerText = "Recuperação de Acesso";
+      esconderErroAuth();
+    }
+
+    function voltarLogin(e) {
+      e.preventDefault();
+      document.getElementById('group-criacao-senha').style.display = 'none';
+      document.getElementById('group-recuperacao').style.display = 'none';
+      document.getElementById('group-login').style.display = 'flex';
+      document.getElementById('auth-subtitle').innerText = "Digite seu e-mail e senha de acesso para entrar.";
+      esconderErroAuth();
+    }
+
+    function salvarPrimeiraSenha() {
+      const email = document.getElementById('input-cad-email').value.trim().toLowerCase();
+      const senha = document.getElementById('input-nova-senha').value;
+      const confirma = document.getElementById('input-confirma-senha').value;
+
+      if (!email || !email.includes('@')) {
+        exibirMensagemAuth("Digite um e-mail válido.", "msg-error");
+        return;
+      }
+      if (!senha || senha.length < 6) {
+        exibirMensagemAuth("A senha deve ter pelo menos 6 dígitos.", "msg-error");
+        return;
+      }
+      if (senha !== confirma) {
+        exibirMensagemAuth("As senhas não coincidem.", "msg-error");
+        return;
+      }
+
+      usuarioEmail = email;
+
+      fetch(API_APPS_SCRIPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "cadastrar_senha", email: email, senha: senha }),
+        redirect: 'follow'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "sucesso") {
+          concluirLoginSucesso();
+        } else {
+          exibirMensagemAuth(data.mensagem || "E-mail não localizado na base.", "msg-error");
+        }
+      })
+      .catch(() => {
+        exibirMensagemAuth("Erro ao conectar com o servidor.", "msg-error");
+      });
+    }
+
+    function enviarSolicitacaoRecuperacao() {
+      const email = document.getElementById('input-recup-email').value.trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        exibirMensagemAuth("Digite seu e-mail cadastrado.", "msg-error");
+        return;
+      }
+      
+      fetch(API_APPS_SCRIPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "esqueci_senha", email: email }),
+        redirect: 'follow'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "sucesso") {
+          alert("Passo a passo de recuperação de senha enviado com sucesso para o seu e-mail!");
+          voltarLogin(event);
+        } else {
+          exibirMensagemAuth(data.mensagem || "E-mail não cadastrado.", "msg-error");
+        }
+      });
+    }
+
+    function validarEmailNuvem(email, ehAutoLogin) {
+      fetch(API_APPS_SCRIPT + "?action=validar_aluno&email=" + encodeURIComponent(email), { redirect: 'follow' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.autorizado === true) {
+            usuarioEmail = email;
+            localStorage.setItem('rvr_user_email', usuarioEmail);
+            
+            if (!data.temSenha) {
+              document.getElementById('auth-screen').style.display = 'flex';
+              document.getElementById('group-login').style.display = 'none';
+              document.getElementById('group-criacao-senha').style.display = 'flex';
+              document.getElementById('auth-subtitle').innerText = "Primeiro acesso! Defina sua senha pessoal:";
+            } else {
+              concluirLoginSucesso();
+            }
+          } else {
+            bloquearAcesso();
+            if (!ehAutoLogin) exibirMensagemAuth("E-mail não localizado na base.", "msg-error");
           }
         })
-      );
-    })
-  );
-  self.clients.claim();
-});
+        .catch(() => {
+          bloquearAcesso();
+          if (!ehAutoLogin) exibirMensagemAuth("Erro ao conectar à API.", "msg-error");
+        });
+    }
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
+    function concluirLoginSucesso() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app-main-content').style.display = 'flex';
+      const topbar = document.getElementById('mobile-topbar-header');
+      if (topbar) topbar.style.display = 'flex';
+      
+      const onboardingOk = localStorage.getItem('rvr_onboarding_ok');
+      if (onboardingOk !== 'true') {
+        document.getElementById('ob-email-display').value = usuarioEmail;
+        document.getElementById('modal-onboarding').style.display = 'flex';
+      }
+
+      calcularPlanejamento();
+    }
+
+    function exibirMensagemAuth(msg, classe) {
+      const el = document.getElementById('auth-msg');
+      el.innerText = msg; 
+      el.className = classe; 
+      el.style.display = 'block';
+    }
+
+    function esconderErroAuth() {
+      document.getElementById('auth-msg').style.display = 'none';
+    }
+
+    function toggleSidebarMobile() {
+      const sidebar = document.getElementById('sidebar-menu');
+      if (sidebar) sidebar.classList.toggle('open');
+    }
+
+    function minimizarCTA() {
+      document.getElementById('box-banner-cta').style.display = 'none';
+      document.getElementById('btn-minimized-cta').style.display = 'block';
+    }
+
+    function expandirCTA() {
+      document.getElementById('box-banner-cta').style.display = 'block';
+      document.getElementById('btn-minimized-cta').style.display = 'none';
+    }
+
+    // CAPTURA DO EVENTO DE INSTALAÇÃO PWA PARA O BOTÃO DIRETO
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btnInstall = document.getElementById('btn-install-pwa');
+      if (btnInstall) btnInstall.style.display = 'block';
+    });
+
+    async function instalarAppPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert('📲 Para instalar no iPhone / iPad:\n\n1. Toque em "Compartilhar" no Safari.\n2. Selecione "Adicionar à Tela de Início".');
+        } else {
+          alert('📲 Para instalar:\n\n1. Abra o menu do navegador (3 pontinhos).\n2. Clique em "Adicionar à Tela inicial" ou "Instalar Aplicativo".');
+        }
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('btn-theme-text').innerText = isLight ? '🌙 Modo Escuro' : '☀️ Modo Claro';
+    }
+
+    function parseMoedaFloat(str) {
+      if (typeof str === 'number') return str;
+      if (!str) return 0;
+      return parseFloat(str.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+    }
+
+    function formatarMoeda(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function mascaraMoedaInput(input) {
+      let v = input.value.replace(/\D/g, '');
+      v = (v / 100).toFixed(2) + '';
+      v = v.replace(".", ",");
+      v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+      input.value = "R$ " + v;
+    }
+
+    function mascaraTelefone(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+      } else if (v.length > 5) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+      } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+      } else {
+        v = v.replace(/^(\d*)$/, "($1");
+      }
+      input.value = v;
+    }
+
+    function calcularPlanejamento() {
+      const salarioPretendido = parseMoedaFloat(document.getElementById('salario-pretendido').value);
+      const salarioFixo = parseMoedaFloat(document.getElementById('salario-fixo').value);
+      const comissaoPct = (parseFloat(document.getElementById('comissao-media').value) || 0) / 100;
+      const conversaoPct = (parseFloat(document.getElementById('taxa-conversao-media').value) || 0) / 100;
+      const ticketMedio = parseMoedaFloat(document.getElementById('ticket-medio').value);
+      const diasTrabalhados = parseFloat(document.getElementById('dias-trabalhados').value) || 1;
+
+      let metaComissao = salarioPretendido - salarioFixo;
+      if (metaComissao < 0) metaComissao = 0;
+
+      let faturamentoNecessario = comissaoPct > 0 ? (metaComissao / comissaoPct) : 0;
+      let vendasMes = ticketMedio > 0 ? (faturamentoNecessario / ticketMedio) : 0;
+      let vendasDia = diasTrabalhados > 0 ? (vendasMes / diasTrabalhados) : 0;
+      let leadsMes = conversaoPct > 0 ? (vendasMes / conversaoPct) : 0;
+      let leadsDia = diasTrabalhados > 0 ? (leadsMes / diasTrabalhados) : 0;
+
+      document.getElementById('res-meta-comissao').innerText = formatarMoeda(metaComissao);
+      document.getElementById('res-meta-faturamento').innerText = formatarMoeda(faturamentoNecessario);
+      document.getElementById('res-vendas-mes').innerText = Math.round(vendasMes).toLocaleString('pt-BR');
+      document.getElementById('res-vendas-dia').innerText = vendasDia.toFixed(1).replace('.', ',');
+      document.getElementById('res-leads-mes').innerText = Math.round(leadsMes).toLocaleString('pt-BR');
+      document.getElementById('res-leads-dia').innerText = Math.round(leadsDia).toLocaleString('pt-BR');
+    }
+
+    function checarSegmentoOutro(select) {
+      const box = document.getElementById('box-segmento-outro');
+      box.style.display = select.value === "Outros" ? "flex" : "none";
+    }
+
+    async function salvarOnboarding(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-salvar-ob');
+      btn.disabled = true;
+      btn.innerText = "⏳ SALVANDO E LIBERANDO...";
+
+      const payload = {
+        action: "salvar_onboarding",
+        email: usuarioEmail,
+        nome: document.getElementById('ob-nome').value,
+        telefone: document.getElementById('ob-telefone').value,
+        cidade: document.getElementById('ob-cidade').value,
+        estado: document.getElementById('ob-estado').value,
+        segmento: document.getElementById('ob-segmento').value,
+        segmento_outro: document.getElementById('ob-segmento-outro').value,
+        faixa_renda: document.getElementById('ob-faixa-renda').value,
+        comissao_media: document.getElementById('ob-comissao').value,
+        aceite_lgpd: document.getElementById('ob-lgpd').checked
+      };
+
+      try {
+        await fetch(API_APPS_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        localStorage.setItem('rvr_onboarding_ok', 'true');
+        document.getElementById('modal-onboarding').style.display = 'none';
+      } catch (err) {
+        alert("Erro ao conectar. Tente novamente.");
+        btn.disabled = false;
+        btn.innerText = "🚀 CONTROLAR O MEU SALÁRIO!";
+      }
+    }
+  </script>
+
+  <!-- REGISTRO DO SERVICE WORKER (PWA) -->
+  <script>
+    let newWorker = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (confirm("🚀 Nova versão disponível! Deseja atualizar agora?")) {
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                  window.location.reload();
+                }
+              }
+            });
+          });
+        }).catch(err => console.log('SW err:', err));
+      });
+    }
+  </script>
+</body>
+</html>
