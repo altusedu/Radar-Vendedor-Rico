@@ -735,7 +735,9 @@
           <button class="btn-action-sidebar" id="btn-menu-dicas" onclick="mostrarAba('dicas')">💡 Dicas de Uso</button>
         </div>
 
-        <button class="btn-install-pwa" id="btn-pwa-install" style="display: none;" onclick="instalarPWA()">📲 Instalar App no Celular</button>
+        <!-- Botão de Instalação Direta PWA -->
+        <button class="btn-install-pwa" id="btn-install-pwa" style="display: none;" onclick="instalarAppPWA()">📲 Instalar Aplicativo</button>
+        
         <button class="btn-action-sidebar" onclick="toggleTheme()" id="btn-theme-text">☀️ Modo Claro</button>
       </div>
 
@@ -914,7 +916,7 @@
 
   <script>
     const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx1gqcdz3eCkLRn3uT421BgUXMqskEFf9R5DAuCMfgpmTt2z4Ej_YU3xK0Mk8Q-cLd2zA/exec";
-    let pwaPromptEvent = null;
+    let deferredPrompt = null;
     let usuarioEmail = "";
     let tentativasSenha = 0;
 
@@ -1181,21 +1183,27 @@
       document.getElementById('btn-minimized-cta').style.display = 'none';
     }
 
+    // CAPTURA DO EVENTO DE INSTALAÇÃO PWA PARA O BOTÃO DIRETO
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
-      pwaPromptEvent = e;
-      const btnPwa = document.getElementById('btn-pwa-install');
-      if (btnPwa) btnPwa.style.display = 'block';
+      deferredPrompt = e;
+      const btnInstall = document.getElementById('btn-install-pwa');
+      if (btnInstall) btnInstall.style.display = 'block';
     });
 
-    async function instalarPWA() {
-      if (!pwaPromptEvent) return;
-      pwaPromptEvent.prompt();
-      const choice = await pwaPromptEvent.userChoice;
-      if (choice.outcome === 'accepted') {
-        document.getElementById('btn-pwa-install').style.display = 'none';
+    async function instalarAppPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert('📲 Para instalar no iPhone / iPad:\n\n1. Toque em "Compartilhar" no Safari.\n2. Selecione "Adicionar à Tela de Início".');
+        } else {
+          alert('📲 Para instalar:\n\n1. Abra o menu do navegador (3 pontinhos).\n2. Clique em "Adicionar à Tela inicial" ou "Instalar Aplicativo".');
+        }
       }
-      pwaPromptEvent = null;
     }
 
     function toggleTheme() {
