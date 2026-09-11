@@ -1,8 +1,9 @@
 {
-  "name": "Radar 10K+ Altus",
-  "short_name": "Radar 10K+",
+  "name": "Radar do Vendedor Rico",
+  "short_name": "Radar do Vendedor Rico",
   "description": "Planejador de Metas Comerciais e Calculadora de Vendas",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
