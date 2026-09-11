@@ -1,6 +1,6 @@
 {
   "name": "Radar do Vendedor Rico",
-  "short_name": "Radar do Vendedor Rico",
+  "short_name": "Radar",
   "description": "Planejador de Metas Comerciais e Calculadora de Vendas",
   "start_url": "./index.html",
   "scope": "./",
