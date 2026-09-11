@@ -1148,7 +1148,6 @@
       
       const onboardingOk = localStorage.getItem('rvr_onboarding_ok');
       if (onboardingOk !== 'true') {
-        // Preenche automaticamente o campo de e-mail desativado no modal de onboarding
         document.getElementById('ob-email-display').value = usuarioEmail;
         document.getElementById('modal-onboarding').style.display = 'flex';
       }
@@ -1304,6 +1303,28 @@
         btn.disabled = false;
         btn.innerText = "🚀 CONTROLAR O MEU SALÁRIO!";
       }
+    }
+  </script>
+
+  <!-- REGISTRO DO SERVICE WORKER (PWA) -->
+  <script>
+    let newWorker = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (confirm("🚀 Nova versão disponível! Deseja atualizar agora?")) {
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                  window.location.reload();
+                }
+              }
+            });
+          });
+        }).catch(err => console.log('SW err:', err));
+      });
     }
   </script>
 </body>
