@@ -600,9 +600,18 @@
       </div>
 
       <div class="auth-input-group" id="group-recuperacao" style="display: none;">
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Enviaremos as instruções pelo e-mail oficial <b>suporte.rp@altusedu.com.br</b>.</p>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Enviaremos um código de verificação pelo e-mail oficial <b>suporte.rp@altusedu.com.br</b>.</p>
         <input type="email" id="input-recup-email" placeholder="Confirme seu e-mail">
-        <button class="btn-auth" onclick="enviarSolicitacaoRecuperacao()">Enviar Solicitação de Recuperação</button>
+        <button class="btn-auth" onclick="enviarSolicitacaoRecuperacao()">Enviar Código de Verificação</button>
+        <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Voltar ao Login</a>
+      </div>
+
+      <div class="auth-input-group" id="group-redefinir-senha" style="display: none;">
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Digite o código de verificação recebido por e-mail (válido por 15 minutos) e crie sua nova senha:</p>
+        <input type="text" id="input-redef-token" placeholder="Código de 6 dígitos" inputmode="numeric" maxlength="6">
+        <input type="password" id="input-redef-nova-senha" placeholder="Nova senha (mín. 6 dígitos)">
+        <input type="password" id="input-redef-confirma-senha" placeholder="Confirme a nova senha">
+        <button class="btn-auth" onclick="confirmarRedefinicaoSenha()">Redefinir Senha e Entrar</button>
         <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Voltar ao Login</a>
       </div>
 
@@ -916,10 +925,11 @@
   </div>
 
   <script>
-    const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx1gqcdz3eCkLRn3uT421BgUXMqskEFf9R5DAuCMfgpmTt2z4Ej_YU3xK0Mk8Q-cLd2zA/exec";
+    const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxKSapt13e1eJO5DlItzOrSgv3uAgZVSAtY5Je7M1nEWkm3iBQQ9hNnMdbnLwzSv3dskw/exec";
     let deferredPrompt = null;
     let usuarioEmail = "";
     let tentativasSenha = 0;
+    let emailRecuperacaoAtual = "";
 
     // CONTROLE DE ABAS DO RVR
     function mostrarAba(abaId) {
@@ -943,17 +953,16 @@
 
     // AUTENTICAÇÃO E LOGIN (PRIMEIRA TELA)
     document.addEventListener("DOMContentLoaded", () => {
+      // O e-mail na URL só pré-preenche o campo de login — nunca autentica sozinho.
       const urlParams = new URLSearchParams(window.location.search);
       const emailUrl = urlParams.get('aluno_id') || urlParams.get('user_id') || urlParams.get('email');
-
       if (emailUrl && emailUrl.trim() !== '' && !emailUrl.includes('#')) {
-        usuarioEmail = emailUrl.trim().toLowerCase();
-      } else {
-        usuarioEmail = localStorage.getItem('rvr_user_email') || "";
+        document.getElementById('input-login-email').value = emailUrl.trim().toLowerCase();
       }
 
-      if (usuarioEmail && usuarioEmail.includes('@')) {
-        validarEmailNuvem(usuarioEmail, true);
+      const tokenSessao = localStorage.getItem('rvr_session_token') || "";
+      if (tokenSessao) {
+        validarSessaoNuvem(tokenSessao);
       } else {
         bloquearAcesso();
       }
@@ -967,7 +976,7 @@
     }
 
     function bloquearAcesso() {
-      localStorage.removeItem('rvr_user_email');
+      localStorage.removeItem('rvr_session_token');
       usuarioEmail = "";
       document.getElementById('auth-screen').style.display = 'flex';
       document.getElementById('app-main-content').style.display = 'none';
@@ -1001,13 +1010,13 @@
         if (data.autorizado) {
           tentativasSenha = 0;
           usuarioEmail = email;
-          localStorage.setItem('rvr_user_email', usuarioEmail);
+          localStorage.setItem('rvr_session_token', data.token);
           concluirLoginSucesso();
         } else {
           if (data.erro === "Senha incorreta.") {
             tentativasSenha++;
             if (tentativasSenha >= 6) {
-              alert("Muitas tentativas incorretas. Vamos enviar instruções de recuperação para o seu e-mail.");
+              alert("Muitas tentativas incorretas. Vamos enviar um código de verificação para o seu e-mail.");
               abrirEsqueciSenha(new Event('click'));
               document.getElementById('input-recup-email').value = email;
               tentativasSenha = 0;
@@ -1030,6 +1039,7 @@
       e.preventDefault();
       document.getElementById('group-login').style.display = 'none';
       document.getElementById('group-recuperacao').style.display = 'none';
+      document.getElementById('group-redefinir-senha').style.display = 'none';
       document.getElementById('group-criacao-senha').style.display = 'flex';
       document.getElementById('auth-subtitle').innerText = "Informe seu e-mail cadastrado e crie sua senha:";
       esconderErroAuth();
@@ -1039,6 +1049,7 @@
       e.preventDefault();
       document.getElementById('group-login').style.display = 'none';
       document.getElementById('group-criacao-senha').style.display = 'none';
+      document.getElementById('group-redefinir-senha').style.display = 'none';
       document.getElementById('group-recuperacao').style.display = 'flex';
       document.getElementById('auth-subtitle').innerText = "Recuperação de Acesso";
       esconderErroAuth();
@@ -1048,6 +1059,7 @@
       e.preventDefault();
       document.getElementById('group-criacao-senha').style.display = 'none';
       document.getElementById('group-recuperacao').style.display = 'none';
+      document.getElementById('group-redefinir-senha').style.display = 'none';
       document.getElementById('group-login').style.display = 'flex';
       document.getElementById('auth-subtitle').innerText = "Digite seu e-mail e senha de acesso para entrar.";
       esconderErroAuth();
@@ -1071,8 +1083,6 @@
         return;
       }
 
-      usuarioEmail = email;
-
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1082,6 +1092,8 @@
       .then(res => res.json())
       .then(data => {
         if (data.status === "sucesso") {
+          usuarioEmail = email;
+          localStorage.setItem('rvr_session_token', data.token);
           concluirLoginSucesso();
         } else {
           exibirMensagemAuth(data.mensagem || "E-mail não localizado na base.", "msg-error");
@@ -1098,7 +1110,7 @@
         exibirMensagemAuth("Digite seu e-mail cadastrado.", "msg-error");
         return;
       }
-      
+
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1108,38 +1120,77 @@
       .then(res => res.json())
       .then(data => {
         if (data.status === "sucesso") {
-          alert("Passo a passo de recuperação de senha enviado com sucesso para o seu e-mail!");
-          voltarLogin(event);
+          emailRecuperacaoAtual = email;
+          document.getElementById('group-recuperacao').style.display = 'none';
+          document.getElementById('group-redefinir-senha').style.display = 'flex';
+          document.getElementById('auth-subtitle').innerText = "Digite o código enviado por e-mail:";
+          esconderErroAuth();
         } else {
           exibirMensagemAuth(data.mensagem || "E-mail não cadastrado.", "msg-error");
         }
+      })
+      .catch(() => {
+        exibirMensagemAuth("Erro ao conectar com o servidor.", "msg-error");
       });
     }
 
-    function validarEmailNuvem(email, ehAutoLogin) {
-      fetch(API_APPS_SCRIPT + "?action=validar_aluno&email=" + encodeURIComponent(email), { redirect: 'follow' })
+    function confirmarRedefinicaoSenha() {
+      const token = document.getElementById('input-redef-token').value.trim();
+      const senha = document.getElementById('input-redef-nova-senha').value;
+      const confirma = document.getElementById('input-redef-confirma-senha').value;
+
+      if (!token) {
+        exibirMensagemAuth("Digite o código de verificação recebido por e-mail.", "msg-error");
+        return;
+      }
+      if (!senha || senha.length < 6) {
+        exibirMensagemAuth("A senha deve ter pelo menos 6 dígitos.", "msg-error");
+        return;
+      }
+      if (senha !== confirma) {
+        exibirMensagemAuth("As senhas não coincidem.", "msg-error");
+        return;
+      }
+
+      fetch(API_APPS_SCRIPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "redefinir_senha", email: emailRecuperacaoAtual, token: token, senha: senha }),
+        redirect: 'follow'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "sucesso") {
+          usuarioEmail = emailRecuperacaoAtual;
+          localStorage.setItem('rvr_session_token', data.token);
+          concluirLoginSucesso();
+        } else {
+          exibirMensagemAuth(data.mensagem || "Não foi possível redefinir a senha.", "msg-error");
+        }
+      })
+      .catch(() => {
+        exibirMensagemAuth("Erro ao conectar com o servidor.", "msg-error");
+      });
+    }
+
+    function validarSessaoNuvem(token) {
+      fetch(API_APPS_SCRIPT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "validar_sessao", token: token }),
+        redirect: 'follow'
+      })
         .then(res => res.json())
         .then(data => {
           if (data && data.autorizado === true) {
-            usuarioEmail = email;
-            localStorage.setItem('rvr_user_email', usuarioEmail);
-            
-            if (!data.temSenha) {
-              document.getElementById('auth-screen').style.display = 'flex';
-              document.getElementById('group-login').style.display = 'none';
-              document.getElementById('group-criacao-senha').style.display = 'flex';
-              document.getElementById('auth-subtitle').innerText = "Primeiro acesso! Defina sua senha pessoal:";
-            } else {
-              concluirLoginSucesso();
-            }
+            usuarioEmail = data.email;
+            concluirLoginSucesso();
           } else {
             bloquearAcesso();
-            if (!ehAutoLogin) exibirMensagemAuth("E-mail não localizado na base.", "msg-error");
           }
         })
         .catch(() => {
           bloquearAcesso();
-          if (!ehAutoLogin) exibirMensagemAuth("Erro ao conectar à API.", "msg-error");
         });
     }
 
@@ -1284,7 +1335,7 @@
 
       const payload = {
         action: "salvar_onboarding",
-        email: usuarioEmail,
+        token: localStorage.getItem('rvr_session_token') || "",
         nome: document.getElementById('ob-nome').value,
         telefone: document.getElementById('ob-telefone').value,
         cidade: document.getElementById('ob-cidade').value,
