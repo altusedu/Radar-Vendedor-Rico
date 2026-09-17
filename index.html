@@ -1008,7 +1008,7 @@
           tentativasSenha = 0;
           usuarioEmail = email;
           localStorage.setItem('rvr_session_token', data.token);
-          concluirLoginSucesso();
+          concluirLoginSucesso(data.onboardingConcluido);
         } else {
           if (data.erro === "Senha incorreta.") {
             tentativasSenha++;
@@ -1091,7 +1091,7 @@
         if (data.status === "sucesso") {
           usuarioEmail = email;
           localStorage.setItem('rvr_session_token', data.token);
-          concluirLoginSucesso();
+          concluirLoginSucesso(data.onboardingConcluido);
         } else {
           exibirMensagemAuth(data.mensagem || "E-mail não localizado na base.", "msg-error", true);
         }
@@ -1160,7 +1160,7 @@
         if (data.status === "sucesso") {
           usuarioEmail = emailRecuperacaoAtual;
           localStorage.setItem('rvr_session_token', data.token);
-          concluirLoginSucesso();
+          concluirLoginSucesso(data.onboardingConcluido);
         } else {
           exibirMensagemAuth(data.mensagem || "Não foi possível redefinir a senha.", "msg-error");
         }
@@ -1181,7 +1181,7 @@
         .then(data => {
           if (data && data.autorizado === true) {
             usuarioEmail = data.email;
-            concluirLoginSucesso();
+            concluirLoginSucesso(data.onboardingConcluido);
           } else {
             bloquearAcesso();
           }
@@ -1191,14 +1191,16 @@
         });
     }
 
-    function concluirLoginSucesso() {
+    function concluirLoginSucesso(onboardingConcluidoBackend) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app-main-content').style.display = 'flex';
       const topbar = document.getElementById('mobile-topbar-header');
       if (topbar) topbar.style.display = 'flex';
-      
-      const onboardingOk = localStorage.getItem('rvr_onboarding_ok');
-      if (onboardingOk !== 'true') {
+
+      // Fonte de verdade é o backend (onboardingConcluidoBackend); localStorage só espelha como cache.
+      const onboardingOk = onboardingConcluidoBackend === true;
+      localStorage.setItem('rvr_onboarding_ok', onboardingOk ? 'true' : 'false');
+      if (!onboardingOk) {
         document.getElementById('ob-email-display').value = usuarioEmail;
         document.getElementById('modal-onboarding').style.display = 'flex';
       }
