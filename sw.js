@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radar-vendedor-rico-v3';
+const CACHE_NAME = 'radar-vendedor-rico-v4';
 const urlsToCache = [
   './index.html',
   './manifest.json',
