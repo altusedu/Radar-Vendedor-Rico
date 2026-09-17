@@ -616,6 +616,7 @@
       </div>
 
       <div id="auth-msg" style="margin-top: 15px; font-size: 0.85rem; display: none;"></div>
+      <a href="#" id="btn-ir-checkout" target="_blank" class="btn-upgrade" style="display: none; margin-top: 12px;">💲 Fazer minha assinatura agora</a>
     </div>
   </div>
 
@@ -926,6 +927,7 @@
 
   <script>
     const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxKSapt13e1eJO5DlItzOrSgv3uAgZVSAtY5Je7M1nEWkm3iBQQ9hNnMdbnLwzSv3dskw/exec";
+    const CHECKOUT_URL = "https://sun.eduzz.com/1W32Z84J92";
     let deferredPrompt = null;
     let usuarioEmail = "";
     let tentativasSenha = 0;
@@ -1024,7 +1026,7 @@
             }
             exibirMensagemAuth(`Senha incorreta. Tentativa ${tentativasSenha} de 5.`, "msg-error");
           } else {
-            exibirMensagemAuth(data.erro || "Credenciais inválidas.", "msg-error");
+            exibirMensagemAuth(data.erro || "Credenciais inválidas.", "msg-error", true);
           }
         }
       })
@@ -1096,7 +1098,7 @@
           localStorage.setItem('rvr_session_token', data.token);
           concluirLoginSucesso();
         } else {
-          exibirMensagemAuth(data.mensagem || "E-mail não localizado na base.", "msg-error");
+          exibirMensagemAuth(data.mensagem || "E-mail não localizado na base.", "msg-error", true);
         }
       })
       .catch(() => {
@@ -1126,7 +1128,7 @@
           document.getElementById('auth-subtitle').innerText = "Digite o código enviado por e-mail:";
           esconderErroAuth();
         } else {
-          exibirMensagemAuth(data.mensagem || "E-mail não cadastrado.", "msg-error");
+          exibirMensagemAuth(data.mensagem || "E-mail não cadastrado.", "msg-error", true);
         }
       })
       .catch(() => {
@@ -1209,15 +1211,24 @@
       calcularPlanejamento();
     }
 
-    function exibirMensagemAuth(msg, classe) {
+    function exibirMensagemAuth(msg, classe, mostrarCheckout) {
       const el = document.getElementById('auth-msg');
-      el.innerText = msg; 
-      el.className = classe; 
+      el.innerText = msg;
+      el.className = classe;
       el.style.display = 'block';
+
+      const btnCheckout = document.getElementById('btn-ir-checkout');
+      if (mostrarCheckout) {
+        btnCheckout.href = CHECKOUT_URL;
+        btnCheckout.style.display = 'block';
+      } else {
+        btnCheckout.style.display = 'none';
+      }
     }
 
     function esconderErroAuth() {
       document.getElementById('auth-msg').style.display = 'none';
+      document.getElementById('btn-ir-checkout').style.display = 'none';
     }
 
     function toggleSidebarMobile() {
