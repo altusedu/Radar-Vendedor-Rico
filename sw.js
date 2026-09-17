@@ -1,9 +1,12 @@
-const CACHE_NAME = 'radar-vendedor-rico-v2';
+const CACHE_NAME = 'radar-vendedor-rico-v3';
 const urlsToCache = [
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './logo-dark.png',
+  './logo-light.png',
+  './logo-customizada.jpeg'
 ];
 
 self.addEventListener('install', (event) => {
