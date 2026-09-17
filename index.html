@@ -109,25 +109,20 @@
     }
 
     .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
       margin-bottom: 10px;
       cursor: pointer;
     }
 
     .brand-logo {
-      max-height: 48px;
-      width: auto;
+      width: 100%;
+      height: auto;
       object-fit: contain;
+      display: block;
     }
 
-    .brand-title {
-      font-size: 1.05rem;
-      color: var(--accent-orange);
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
+    .brand-logo-light { display: none; }
+    body.light-theme .brand-logo-dark { display: none; }
+    body.light-theme .brand-logo-light { display: block; }
 
     .btn-action-sidebar {
       background: rgba(249, 115, 22, 0.1);
@@ -575,7 +570,7 @@
   <!-- TELA DE AUTENTICAÇÃO / LOGIN -->
   <div id="auth-screen">
     <div class="auth-card">
-      <img src="icon-192.png" alt="Logo Radar do Vendedor Rico" class="auth-logo" onerror="this.style.display='none'">
+      <img src="logo-customizada.jpeg" alt="Logo Radar do Vendedor Rico" class="auth-logo" onerror="this.style.display='none'">
       <h2>RADAR VENDEDOR RICO</h2>
       <p id="auth-subtitle">Digite seu e-mail e senha de acesso para entrar.</p>
       
@@ -737,8 +732,8 @@
     <div class="sidebar" id="sidebar-menu">
       <div class="sidebar-top">
         <div class="brand-container" onclick="mostrarAba('planejador')">
-          <img src="icon-192.png" alt="Logo Radar do Vendedor Rico" class="brand-logo" onerror="this.style.display='none'">
-          <div class="brand-title">RADAR VENDEDOR RICO</div>
+          <img src="logo-dark.png" alt="Logo Radar do Vendedor Rico" class="brand-logo brand-logo-dark" onerror="this.src='icon-512.png'">
+          <img src="logo-light.png" alt="Logo Radar do Vendedor Rico" class="brand-logo brand-logo-light" onerror="this.src='icon-512.png'">
         </div>
         
         <div style="display: flex; flex-direction: column; gap: 8px;">
