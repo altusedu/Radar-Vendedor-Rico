@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+<!-- © Grupo Altus Educacional — Radar do Vendedor Rico — 2026-09-17 — Desenvolvido por Rafael Pires. Cópia não autorizada. -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,6 +15,7 @@
   <meta name="apple-mobile-web-app-title" content="Radar do Vendedor Rico">
 
   <style>
+    /* © Grupo Altus Educacional — Radar do Vendedor Rico — 2026-09-17 — Desenvolvido por Rafael Pires. Cópia não autorizada. */
     :root {
       --bg-dark: #0f172a;
       --card-bg: #1e293b;
@@ -921,7 +923,11 @@
   </div>
 
   <script>
+    // © Grupo Altus Educacional — Radar do Vendedor Rico — 2026-09-17 — Desenvolvido por Rafael Pires. Cópia não autorizada.
+    console.log("%c© Grupo Altus Educacional — Radar do Vendedor Rico\nDesenvolvido por Rafael Pires — 2026-09-17\nCópia, redistribuição ou engenharia reversa não autorizadas.", "color:#f97316; font-weight:bold;");
+
     const API_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxKSapt13e1eJO5DlItzOrSgv3uAgZVSAtY5Je7M1nEWkm3iBQQ9hNnMdbnLwzSv3dskw/exec";
+    const ORIGEM_HOST = window.location.hostname;
     const CHECKOUT_URL = "https://sun.eduzz.com/1W32Z84J92";
     let deferredPrompt = null;
     let usuarioEmail = "";
@@ -996,7 +1002,7 @@
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "validar_aluno", email: email, senha: senha }),
+        body: JSON.stringify({ action: "validar_aluno", email: email, senha: senha, origemHost: ORIGEM_HOST }),
         redirect: 'follow'
       })
       .then(res => res.json())
@@ -1083,7 +1089,7 @@
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "cadastrar_senha", email: email, senha: senha }),
+        body: JSON.stringify({ action: "cadastrar_senha", email: email, senha: senha, origemHost: ORIGEM_HOST }),
         redirect: 'follow'
       })
       .then(res => res.json())
@@ -1111,7 +1117,7 @@
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "esqueci_senha", email: email }),
+        body: JSON.stringify({ action: "esqueci_senha", email: email, origemHost: ORIGEM_HOST }),
         redirect: 'follow'
       })
       .then(res => res.json())
@@ -1152,7 +1158,7 @@
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "redefinir_senha", email: emailRecuperacaoAtual, token: token, senha: senha }),
+        body: JSON.stringify({ action: "redefinir_senha", email: emailRecuperacaoAtual, token: token, senha: senha, origemHost: ORIGEM_HOST }),
         redirect: 'follow'
       })
       .then(res => res.json())
@@ -1174,7 +1180,7 @@
       fetch(API_APPS_SCRIPT, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "validar_sessao", token: token }),
+        body: JSON.stringify({ action: "validar_sessao", token: token, origemHost: ORIGEM_HOST }),
         redirect: 'follow'
       })
         .then(res => res.json())
@@ -1344,6 +1350,7 @@
       const payload = {
         action: "salvar_onboarding",
         token: localStorage.getItem('rvr_session_token') || "",
+        origemHost: ORIGEM_HOST,
         nome: document.getElementById('ob-nome').value,
         telefone: document.getElementById('ob-telefone').value,
         cidade: document.getElementById('ob-cidade').value,
