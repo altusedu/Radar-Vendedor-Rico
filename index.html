@@ -874,6 +874,7 @@
             </div>
 
           </div>
+          <p id="erro-calculo-meta" class="msg-error" style="display:none; font-size:0.78rem; margin-top:8px;">Não foi possível calcular agora. Verifique sua conexão.</p>
         </div>
 
         <!-- ABA 2: DICAS DE USO & FÓRMULAS -->
@@ -1433,29 +1434,67 @@
       input.value = v;
     }
 
+    // Lógica de cálculo migrada para o backend (action "calcular_meta", como camada extra de
+    // proteção anticópia) — aqui só ficam a leitura dos campos, o debounce pra não disparar
+    // uma chamada de rede por tecla digitada, e a escrita do resultado no DOM.
+    function debounce(fn, delayMs) {
+      let timeoutId = null;
+      return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn.apply(this, args), delayMs);
+      };
+    }
+
+    function definirOpacidadeResultados(ids, calculando) {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.opacity = calculando ? '0.5' : '1';
+      });
+    }
+
+    function exibirErroCalculadora(idErro, mostrar) {
+      const el = document.getElementById(idErro);
+      if (el) el.style.display = mostrar ? 'block' : 'none';
+    }
+
+    const IDS_RESULTADO_PLANEJAMENTO = ['res-meta-comissao', 'res-meta-faturamento', 'res-vendas-mes', 'res-vendas-dia', 'res-leads-mes', 'res-leads-dia'];
+
+    const executarCalculoPlanejamentoDebounced = debounce(async function (salarioPretendido, salarioFixo, comissaoMediaPercentual, taxaConversaoPercentual, ticketMedio, diasTrabalhados) {
+      try {
+        const data = await fetchComRetry(API_APPS_SCRIPT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: "calcular_meta", token: localStorage.getItem('rvr_session_token') || "", origemHost: ORIGEM_HOST, salarioPretendido: salarioPretendido, salarioFixo: salarioFixo, comissaoMediaPercentual: comissaoMediaPercentual, taxaConversaoPercentual: taxaConversaoPercentual, ticketMedio: ticketMedio, diasTrabalhados: diasTrabalhados }),
+          redirect: 'follow'
+        });
+
+        if (data.status !== "sucesso") throw new Error(data.mensagem || "Erro ao calcular.");
+
+        document.getElementById('res-meta-comissao').innerText = formatarMoeda(data.metaComissao);
+        document.getElementById('res-meta-faturamento').innerText = formatarMoeda(data.faturamentoNecessario);
+        document.getElementById('res-vendas-mes').innerText = Math.round(data.vendasMes).toLocaleString('pt-BR');
+        document.getElementById('res-vendas-dia').innerText = data.vendasDia.toFixed(1).replace('.', ',');
+        document.getElementById('res-leads-mes').innerText = Math.round(data.leadsMes).toLocaleString('pt-BR');
+        document.getElementById('res-leads-dia').innerText = Math.round(data.leadsDia).toLocaleString('pt-BR');
+
+        exibirErroCalculadora('erro-calculo-meta', false);
+      } catch (err) {
+        exibirErroCalculadora('erro-calculo-meta', true);
+      } finally {
+        definirOpacidadeResultados(IDS_RESULTADO_PLANEJAMENTO, false);
+      }
+    }, 400);
+
     function calcularPlanejamento() {
       const salarioPretendido = parseMoedaFloat(document.getElementById('salario-pretendido').value);
       const salarioFixo = parseMoedaFloat(document.getElementById('salario-fixo').value);
-      const comissaoPct = (parseFloat(document.getElementById('comissao-media').value) || 0) / 100;
-      const conversaoPct = (parseFloat(document.getElementById('taxa-conversao-media').value) || 0) / 100;
+      const comissaoMediaPercentual = parseFloat(document.getElementById('comissao-media').value) || 0;
+      const taxaConversaoPercentual = parseFloat(document.getElementById('taxa-conversao-media').value) || 0;
       const ticketMedio = parseMoedaFloat(document.getElementById('ticket-medio').value);
       const diasTrabalhados = parseFloat(document.getElementById('dias-trabalhados').value) || 1;
 
-      let metaComissao = salarioPretendido - salarioFixo;
-      if (metaComissao < 0) metaComissao = 0;
-
-      let faturamentoNecessario = comissaoPct > 0 ? (metaComissao / comissaoPct) : 0;
-      let vendasMes = ticketMedio > 0 ? (faturamentoNecessario / ticketMedio) : 0;
-      let vendasDia = diasTrabalhados > 0 ? (vendasMes / diasTrabalhados) : 0;
-      let leadsMes = conversaoPct > 0 ? (vendasMes / conversaoPct) : 0;
-      let leadsDia = diasTrabalhados > 0 ? (leadsMes / diasTrabalhados) : 0;
-
-      document.getElementById('res-meta-comissao').innerText = formatarMoeda(metaComissao);
-      document.getElementById('res-meta-faturamento').innerText = formatarMoeda(faturamentoNecessario);
-      document.getElementById('res-vendas-mes').innerText = Math.round(vendasMes).toLocaleString('pt-BR');
-      document.getElementById('res-vendas-dia').innerText = vendasDia.toFixed(1).replace('.', ',');
-      document.getElementById('res-leads-mes').innerText = Math.round(leadsMes).toLocaleString('pt-BR');
-      document.getElementById('res-leads-dia').innerText = Math.round(leadsDia).toLocaleString('pt-BR');
+      definirOpacidadeResultados(IDS_RESULTADO_PLANEJAMENTO, true);
+      executarCalculoPlanejamentoDebounced(salarioPretendido, salarioFixo, comissaoMediaPercentual, taxaConversaoPercentual, ticketMedio, diasTrabalhados);
     }
 
     function checarSegmentoOutro(select) {
