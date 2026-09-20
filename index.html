@@ -81,6 +81,10 @@
     .auth-input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
     .auth-input-group input { text-align: center; font-size: 1rem; }
     .btn-auth { background-color: var(--accent-orange); color: #fff; font-weight: 700; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; }
+    .campo-senha-wrapper { position: relative; }
+    .campo-senha-wrapper input { width: 100%; padding-right: 44px !important; }
+    .btn-alternar-senha { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+    .btn-alternar-senha svg { width: 20px; height: 20px; display: block; pointer-events: none; }
     #auth-msg { margin-top: 15px; font-size: 0.85rem; font-weight: 600; display: none; }
     .msg-error { color: var(--accent-red); }
 
@@ -578,7 +582,10 @@
       
       <div class="auth-input-group" id="group-login">
         <input type="email" id="input-login-email" placeholder="seu-email@exemplo.com" required>
-        <input type="password" id="input-login-senha" placeholder="Sua senha de acesso" onkeydown="tratarTeclaLogin(event)" required>
+        <div class="campo-senha-wrapper">
+          <input type="password" id="input-login-senha" placeholder="Sua senha de acesso" onkeydown="tratarTeclaLogin(event)" required>
+          <button type="button" class="btn-alternar-senha" onclick="alternarVisibilidadeSenha('input-login-senha', this)" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        </div>
         <button class="btn-auth" id="btn-login" onclick="validarEEntrar()">Entrar no Aplicativo</button>
         
         <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem;">
@@ -607,8 +614,14 @@
       <div class="auth-input-group" id="group-criacao-senha" style="display: none;">
         <p style="font-size: 0.82rem; color: var(--accent-yellow); margin-bottom: 5px;">E-mail confirmado! Agora crie sua senha:</p>
         <input type="email" id="input-cad-email" style="display: none;">
-        <input type="password" id="input-nova-senha" placeholder="Crie sua senha (mín. 6 dígitos)">
-        <input type="password" id="input-confirma-senha" placeholder="Confirme a nova senha">
+        <div class="campo-senha-wrapper">
+          <input type="password" id="input-nova-senha" placeholder="Crie sua senha (mín. 6 dígitos)">
+          <button type="button" class="btn-alternar-senha" onclick="alternarVisibilidadeSenha('input-nova-senha', this)" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        </div>
+        <div class="campo-senha-wrapper">
+          <input type="password" id="input-confirma-senha" placeholder="Confirme a nova senha">
+          <button type="button" class="btn-alternar-senha" onclick="alternarVisibilidadeSenha('input-confirma-senha', this)" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        </div>
         <button class="btn-auth" onclick="salvarPrimeiraSenha()">Cadastrar e Entrar</button>
         <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Já tenho cadastro</a>
       </div>
@@ -621,10 +634,16 @@
       </div>
 
       <div class="auth-input-group" id="group-redefinir-senha" style="display: none;">
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Digite o código de verificação recebido por e-mail (válido por 15 minutos) e crie sua nova senha:</p>
-        <input type="text" id="input-redef-token" placeholder="Código de 6 dígitos" inputmode="numeric" maxlength="6">
-        <input type="password" id="input-redef-nova-senha" placeholder="Nova senha (mín. 6 dígitos)">
-        <input type="password" id="input-redef-confirma-senha" placeholder="Confirme a nova senha">
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">Digite a senha temporária recebida por e-mail (válida por 15 minutos) e crie sua nova senha:</p>
+        <input type="text" id="input-redef-token" placeholder="Senha temporária (6 dígitos)" inputmode="numeric" maxlength="6">
+        <div class="campo-senha-wrapper">
+          <input type="password" id="input-redef-nova-senha" placeholder="Nova senha (mín. 6 dígitos)">
+          <button type="button" class="btn-alternar-senha" onclick="alternarVisibilidadeSenha('input-redef-nova-senha', this)" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        </div>
+        <div class="campo-senha-wrapper">
+          <input type="password" id="input-redef-confirma-senha" placeholder="Confirme a nova senha">
+          <button type="button" class="btn-alternar-senha" onclick="alternarVisibilidadeSenha('input-redef-confirma-senha', this)" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        </div>
         <button class="btn-auth" onclick="confirmarRedefinicaoSenha()">Redefinir Senha e Entrar</button>
         <a href="#" onclick="voltarLogin(event)" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: underline; margin-top: 5px; display:inline-block;">Voltar ao Login</a>
       </div>
@@ -1282,7 +1301,7 @@
           emailRecuperacaoAtual = email;
           document.getElementById('group-recuperacao').style.display = 'none';
           document.getElementById('group-redefinir-senha').style.display = 'flex';
-          document.getElementById('auth-subtitle').innerText = "Digite o código enviado por e-mail:";
+          document.getElementById('auth-subtitle').innerText = "Digite a senha temporária enviada por e-mail:";
           esconderErroAuth();
         } else {
           exibirMensagemAuth(data.mensagem || "E-mail não cadastrado.", "msg-error", true);
@@ -1464,6 +1483,17 @@
         v = v.replace(/^(\d*)$/, "($1");
       }
       input.value = v;
+    }
+
+    const ICONE_OLHO_ABERTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const ICONE_OLHO_FECHADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+
+    function alternarVisibilidadeSenha(idCampo, btn) {
+      const campo = document.getElementById(idCampo);
+      const estaEscondida = campo.type === 'password';
+      campo.type = estaEscondida ? 'text' : 'password';
+      btn.innerHTML = estaEscondida ? ICONE_OLHO_FECHADO : ICONE_OLHO_ABERTO;
+      btn.setAttribute('aria-label', estaEscondida ? 'Esconder senha' : 'Mostrar senha');
     }
 
     // Lógica de cálculo migrada para o backend (action "calcular_meta", como camada extra de
