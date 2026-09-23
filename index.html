@@ -131,6 +131,36 @@
     body.light-theme .brand-logo-dark { display: none; }
     body.light-theme .brand-logo-light { display: block; }
 
+    .user-info-box {
+      display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.2); padding: 8px 12px; border-radius: 6px; position: relative;
+    }
+    .user-profile-wrapper { position: relative; display: flex; align-items: center; cursor: pointer; padding: 2px; }
+    .user-profile-wrapper:hover { opacity: 0.8; }
+    .status-dot {
+      position: absolute; bottom: -2px; right: -2px; width: 8px; height: 8px;
+      background-color: #4ade80; border-radius: 50%; border: 2px solid var(--card-bg);
+    }
+    .user-info-bar { font-size: 0.8rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+
+    /* Dropdown de Logout no Avatar */
+    #user-dropdown-menu {
+      display: none; position: absolute; top: 45px; right: 0; background: var(--card-bg);
+      border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      width: 180px; z-index: 1100; overflow: hidden; flex-direction: column;
+    }
+    #user-dropdown-menu.show { display: flex; }
+    .dropdown-item {
+      background: none; border: none; padding: 12px 15px; text-align: left; color: var(--accent-red);
+      font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      width: 100%; transition: background 0.2s;
+    }
+    .dropdown-item:hover { background: rgba(239, 68, 68, 0.1); }
+
+    .sidebar-inner-content { display: flex; flex-direction: column; gap: 16px; }
+    .nav-frame { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; }
+    .nav-btn-group { display: flex; flex-direction: column; gap: 8px; }
+
     .btn-action-sidebar {
       background: rgba(249, 115, 22, 0.1);
       border: 1px solid var(--border-color);
@@ -145,22 +175,9 @@
       transition: all 0.2s;
     }
 
-    .btn-install-pwa {
-      background: var(--accent-orange);
-      color: #fff;
-      border: none;
-      padding: 12px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 0.85rem;
-      text-align: center;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-      transition: all 0.2s;
-    }
-
-    .btn-install-pwa:hover { opacity: 0.9; }
+    .footer-actions { display: flex; gap: 8px; }
+    .row-btn { flex: 1; background: rgba(249, 115, 22, 0.1); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-install-footer { flex: 1; background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.5); color: var(--accent-yellow); padding: 8px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
     /* BANNER CTA REATIVO & MINIMIZÁVEL */
     .banner-cta {
@@ -797,16 +814,36 @@
           <img src="logo-dark.png" alt="Logo Radar do Vendedor Rico" class="brand-logo brand-logo-dark" onerror="this.src='icon-512.png'">
           <img src="logo-light.png" alt="Logo Radar do Vendedor Rico" class="brand-logo brand-logo-light" onerror="this.src='icon-512.png'">
         </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button class="btn-action-sidebar" id="btn-menu-planejador" onclick="mostrarAba('planejador')">📊 Planejador de Metas</button>
-          <button class="btn-action-sidebar" id="btn-menu-dicas" onclick="mostrarAba('dicas')">💡 Dicas de Uso</button>
-        </div>
 
-        <!-- Botão de Instalação Direta PWA -->
-        <button class="btn-install-pwa" id="btn-install-pwa" style="display: none;" onclick="instalarAppPWA()">📲 Instalar Aplicativo</button>
-        
-        <button class="btn-action-sidebar" onclick="toggleTheme()" id="btn-theme-text">☀️ Modo Claro</button>
+        <div class="sidebar-inner-content">
+          <div class="user-info-box">
+            <span class="user-info-bar" id="display-user-email"></span>
+            <div class="user-profile-wrapper" title="Opções de Usuário / Sair" onclick="toggleUserDropdown(event)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span class="status-dot"></span>
+            </div>
+
+            <!-- Menu Dropdown de Sair -->
+            <div id="user-dropdown-menu">
+              <button class="dropdown-item" onclick="fazerLogout()">🚪 Sair (Encerrar Sessão)</button>
+            </div>
+          </div>
+
+          <div class="nav-frame">
+            <div class="nav-btn-group">
+              <button class="btn-action-sidebar" id="btn-menu-planejador" onclick="mostrarAba('planejador')">📊 Planejador de Metas</button>
+              <button class="btn-action-sidebar" id="btn-menu-dicas" onclick="mostrarAba('dicas')">💡 Dicas de Uso</button>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <button class="row-btn" onclick="toggleTheme()" id="btn-theme-text" title="Alternar Tema">☀️ Tema</button>
+            <button class="btn-install-footer" onclick="instalarAppPWA()" id="btn-install-pwa">📲 Instalar</button>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -1048,6 +1085,23 @@
       document.getElementById('app-main-content').style.display = 'none';
       const topbar = document.getElementById('mobile-topbar-header');
       if (topbar) topbar.style.display = 'none';
+    }
+
+    function toggleUserDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('user-dropdown-menu');
+      if (menu) menu.classList.toggle('show');
+    }
+
+    window.addEventListener('click', () => {
+      const menu = document.getElementById('user-dropdown-menu');
+      if (menu) menu.classList.remove('show');
+    });
+
+    function fazerLogout() {
+      const menu = document.getElementById('user-dropdown-menu');
+      if (menu) menu.classList.remove('show');
+      bloquearAcesso();
     }
 
     // Cota do Apps Script às vezes devolve uma página HTML de erro com status 200 em vez do JSON
@@ -1413,6 +1467,7 @@
     function concluirLoginSucesso(onboardingConcluidoBackend) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app-main-content').style.display = 'flex';
+      document.getElementById('display-user-email').innerText = usuarioEmail;
       const topbar = document.getElementById('mobile-topbar-header');
       if (topbar) topbar.style.display = 'flex';
 
@@ -1466,8 +1521,6 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      const btnInstall = document.getElementById('btn-install-pwa');
-      if (btnInstall) btnInstall.style.display = 'block';
     });
 
     async function instalarAppPWA() {
@@ -1488,7 +1541,7 @@
     function toggleTheme() {
       document.body.classList.toggle('light-theme');
       const isLight = document.body.classList.contains('light-theme');
-      document.getElementById('btn-theme-text').innerText = isLight ? '🌙 Modo Escuro' : '☀️ Modo Claro';
+      document.getElementById('btn-theme-text').innerText = isLight ? '🌙 Tema' : '☀️ Tema';
     }
 
     function parseMoedaFloat(str) {
