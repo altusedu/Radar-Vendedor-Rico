@@ -563,6 +563,38 @@
       padding: 4px 8px;
     }
 
+    /* Playbook "Meta Sem Mistério" (aba Dicas de Uso): leitor somente leitura, páginas em imagem */
+    .pb-barra { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .pb-nav { min-height: 44px; min-width: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+    .pb-nav:hover { border-color: var(--accent-orange); color: var(--accent-orange); }
+    .pb-nav-pri { background: var(--accent-orange); border-color: var(--accent-orange); color: #fff; }
+    .pb-nav-pri:hover { color: #fff; filter: brightness(1.08); }
+    .pb-zoom { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; }
+    .pb-z { padding: 0; font-size: 1.2rem; flex: none !important; width: 44px; }
+    .pb-tela { display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none !important; width: 44px; }
+    .pb-tela svg { width: 18px; height: 18px; }
+    .pb-rolo { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 70px; }
+    .pb-flutua { position: fixed; right: 18px; bottom: 18px; z-index: 50; display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 6px 6px 6px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .pb-pos { font-family: ui-monospace, Consolas, monospace; color: var(--text-muted); font-size: 0.9rem; }
+    .pb-paginas { width: 100%; max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+    .pb-pg { position: relative; width: 100%; aspect-ratio: 1240 / 1755; background: #2a2623; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35); scroll-margin-top: 76px; }
+    .pb-pg img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; -webkit-user-drag: none; }
+    .pb-link { position: absolute; display: block; border-radius: 3px; cursor: pointer; }
+    .pb-link:hover, .pb-link:focus-visible { background: rgba(249,115,22,.14); outline: 2px solid rgba(249,115,22,.6); }
+    .pb-marca { position: absolute; left: 0; right: 0; bottom: 0.6%; text-align: center; font-size: clamp(8px, 1.1vw, 11px); color: rgba(120,100,90,.75); pointer-events: none; font-family: ui-monospace, Consolas, monospace; }
+    .pb-marca-centro { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-size: clamp(12px, 2.4vw, 22px); font-weight: bold; color: rgba(120,100,90,.11); pointer-events: none; font-family: ui-monospace, Consolas, monospace; }
+    /* Tela cheia: a aba vira uma camada sobre o app (funciona também no iPhone, que não tem tela cheia de página) */
+    #aba-dicas.pb-tela-cheia { position: fixed; inset: 0; z-index: 5000; background: var(--bg-dark); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px; }
+    #aba-dicas.pb-tela-cheia > h1, #aba-dicas.pb-tela-cheia > .subtitle, #aba-dicas.pb-tela-cheia > .dicas-cta-box { display: none; }
+    #aba-dicas.pb-tela-cheia .pb-barra { position: sticky; top: 0; z-index: 3; background: var(--bg-dark); padding: 10px 0; margin-bottom: 6px; }
+    body.pb-tela-cheia-aberta { overflow: hidden; }
+    /* Proteção contra captura: ao perder o foco ou ao tentar imprimir/printar, as páginas ficam borradas */
+    #aba-dicas.pb-protegido .pb-paginas { filter: blur(22px); }
+    .pb-aviso { display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5100; max-width: 320px; width: calc(100% - 32px); background: var(--card-bg); border: 1px solid var(--accent-orange); border-radius: 12px; padding: 18px; text-align: center; color: var(--text-main); font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+    #aba-dicas.pb-protegido .pb-aviso { display: block; }
+    @media print { #aba-dicas .pb-rolo, #aba-dicas .pb-barra, #aba-dicas .pb-flutua { display: none !important; } }
+    @media (max-width: 600px) { .pb-barra .pb-nav { padding: 0 10px; font-size: 0.82rem; flex: 1; } .pb-zoom { width: 100%; justify-content: flex-end; } .pb-paginas { gap: 10px; } .pb-flutua { right: 12px; bottom: 12px; } }
+
     @media (max-width: 1024px) {
       .form-grid { grid-template-columns: repeat(2, 1fr); }
       .grid-cards { grid-template-columns: repeat(2, 1fr); }
@@ -897,7 +929,7 @@
               <div class="input-field">
                 <label for="taxa-conversao-media">
                   Taxa de Conversão Média (%)
-                  <a onclick="mostrarAba('dicas')">o que é isso?</a>
+                  <a onclick="abrirExplicacaoCampo('conversao')">o que é isso?</a>
                 </label>
                 <input type="number" id="taxa-conversao-media" inputmode="decimal" value="10" step="any" oninput="calcularPlanejamento()">
                 <small>De 100 clientes atendidos, quantos compram?</small>
@@ -906,7 +938,7 @@
               <div class="input-field">
                 <label for="ticket-medio">
                   Ticket Médio por Venda (R$)
-                  <a onclick="mostrarAba('dicas')">o que é isso?</a>
+                  <a onclick="abrirExplicacaoCampo('ticket')">o que é isso?</a>
                 </label>
                 <input type="text" id="ticket-medio" inputmode="decimal" value="R$ 500,00" oninput="mascaraMoedaInput(this); calcularPlanejamento()">
                 <small>Valor médio das vendas realizadas</small>
@@ -965,45 +997,29 @@
 
         <!-- ABA 2: DICAS DE USO & FÓRMULAS -->
         <div id="aba-dicas" class="aba-content" style="display: none;">
-          <h1>💡 Dicas de Uso & Fórmulas de Indicadores</h1>
-          <p class="subtitle">Entenda em detalhes como calculamos seus indicadores comerciais e aprenda a utilizá-los para bater suas metas.</p>
+          <h1>Dicas de Uso</h1>
+          <p class="subtitle">Meta Sem Mistério: cada número do Radar explicado com contas de escola, do salário que você quer até quantos clientes atender por dia.</p>
 
-          <div class="sub-nav">
-            <button class="sub-btn active" id="btn-sub-formulas" onclick="switchDicaSub('formulas', event)">📐 Fórmulas dos Indicadores</button>
-            <button class="sub-btn" id="btn-sub-estrategias" onclick="switchDicaSub('estrategias', event)">🚀 Estratégias de Crescimento</button>
+          <div class="pb-barra">
+            <button type="button" class="pb-nav" onclick="irPaginaPlaybook(1)">Capa</button>
+            <button type="button" class="pb-nav" onclick="irPaginaPlaybook(4)">Sumário</button>
+            <button type="button" class="pb-nav" onclick="irPaginaPlaybook(5)">A conta</button>
+            <button type="button" class="pb-nav" onclick="irPaginaPlaybook(6)">Dicas</button>
+            <button type="button" class="pb-nav" onclick="irPaginaPlaybook(8)">Tira-dúvidas</button>
+            <span class="pb-zoom">
+              <button type="button" class="pb-nav pb-z" onclick="zoomPlaybook(-1)" aria-label="Diminuir">&minus;</button>
+              <span id="pb-zoom-val">100%</span>
+              <button type="button" class="pb-nav pb-z" onclick="zoomPlaybook(1)" aria-label="Ampliar">+</button>
+              <button type="button" class="pb-nav pb-tela" id="pb-btn-tela" onclick="alternarTelaCheiaPlaybook()" aria-label="Tela cheia"></button>
+            </span>
           </div>
-
-          <div id="sub-dicas-formulas">
-            <div class="tip-card">
-              <h3>💡 O que é Ticket Médio?</h3>
-              <p>O Ticket Médio representa o valor financeiro médio das vendas realizadas em um período. Ele mostra se o seu público está investindo em produtos mais robustos ou comprando itens de menor valor por pedido.</p>
-              <div class="tip-example">
-                <b>Como é calculado:</b><br>
-                Ticket Médio = Faturamento Total das Vendas ÷ Número Total de Vendas Realizadas
-                <i>Exemplo: Se você faturou R$ 10.000,00 em 20 vendas, seu Ticket Médio é de R$ 500,00.</i>
-              </div>
-            </div>
-
-            <div class="tip-card">
-              <h3>🎯 O que é Taxa de Conversão?</h3>
-              <p>A Taxa de Conversão mede a eficácia do seu atendimento e prospecção. Indica a porcentagem exata de pessoas que se tornaram compradoras em relação ao total de leads abordados.</p>
-              <div class="tip-example">
-                <b>Como é calculado:</b><br>
-                Taxa de Conversão = (Número de Vendas Realizadas ÷ Atendimentos Realizados) x 100
-                <i>Exemplo: Se você atendeu 100 interessados e fechou 10 vendas, sua Taxa de Conversão é de 10%.</i>
-              </div>
-            </div>
+          <div class="pb-aviso" id="pb-aviso">Conteúdo protegido: leitura somente dentro do app.</div>
+          <div class="pb-rolo" id="pb-rolo">
+            <div id="pb-paginas" class="pb-paginas" oncontextmenu="return false;"></div>
           </div>
-
-          <div id="sub-dicas-estrategias" style="display: none;">
-            <div class="tip-card">
-              <h3>🚀 Como Aumentar seu Ticket Médio</h3>
-              <p>• <b>Cross-Sell:</b> Ofereça produtos ou serviços complementares antes de fechar o pedido.<br>• <b>Ancoragem de Preços:</b> Apresente três opções de pacotes (Básico, Intermediário e Premium). Os clientes tendem a escolher a opção intermediária com maior valor agregado.<br>• <b>Kits e Combos:</b> Agrupe produtos para elevar o valor percebido e conceda um pequeno incentivo no frete ou prazo.</p>
-            </div>
-            <div class="tip-card">
-              <h3>🎯 Como Aumentar sua Taxa de Conversão</h3>
-              <p>• <b>Velocidade de Resposta:</b> Responder leads nos primeiros 5 minutos aumenta drasticamente as chances de fechamento.<br>• <b>Contorno de Objeções:</b> Ouça o "vou pensar" mas faça perguntas específicas para descobrir qual é a verdadeira objeção travando a compra.<br>• <b>Garantias e Prova Social:</b> Apresente depoimentos de clientes satisfeitos para gerar confiança imediata.</p>
-            </div>
+          <div class="pb-flutua" id="pb-flutua">
+            <span class="pb-pos" id="pb-pos">01 / 12</span>
+            <button type="button" class="pb-nav pb-nav-pri" onclick="irPaginaPlaybook(4)">Sumário</button>
           </div>
 
           <!-- CTA ESTRATÉGICO PARA O RADAR PRO -->
@@ -1044,18 +1060,217 @@
       
       document.getElementById('btn-menu-planejador').style.borderColor = abaId === 'planejador' ? 'var(--accent-orange)' : 'var(--border-color)';
       document.getElementById('btn-menu-dicas').style.borderColor = abaId === 'dicas' ? 'var(--accent-orange)' : 'var(--border-color)';
+      if (abaId === 'dicas') abrirPlaybook();
+      else sairTelaCheiaPlaybook();
 
       const sidebar = document.getElementById('sidebar-menu');
       if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('open');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function switchDicaSub(type, ev) {
-      document.getElementById('sub-dicas-formulas').style.display = type === 'formulas' ? 'block' : 'none';
-      document.getElementById('sub-dicas-estrategias').style.display = type === 'estrategias' ? 'block' : 'none';
-      document.querySelectorAll('.sub-btn').forEach(el => el.classList.remove('active'));
-      if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+    // ---------- Playbook "Meta Sem Mistério": leitor somente leitura (sem PDF, sem download) ----------
+    // Cada página é uma imagem; o sumário, a conta e o CTA viram áreas clicáveis.
+    // PB_LINKS: [página, x%, y%, largura%, altura%, destino]. Destino: nº da página, [página, % do topo] ou URL.
+    // Fonte e gerador: PRODUTOS/PRODUTO ENTRADA/playbook-dicas-de-uso-base (render.py gera as imagens e o links.json).
+    const PB_TOTAL = 12;
+    const PB_LINKS = [[3,11.96,70.25,24.52,5.25,[8,23.61]],[3,37.74,70.25,24.52,5.25,[8,40.19]],[3,63.52,70.25,24.52,5.25,[8,54.84]],[3,11.96,76.39,24.52,5.25,[9,6.86]],[3,37.74,76.39,24.52,5.25,[9,27.85]],[3,63.52,76.39,24.52,5.25,[9,48.83]],[4,9.07,22.91,81.86,4.2,5],[4,9.07,29.42,81.86,4.2,6],[4,9.07,33.62,39.04,3.11,[6,24.17]],[4,9.07,36.73,39.04,3.11,[6,34.3]],[4,9.07,39.84,39.04,3.11,[6,44.43]],[4,9.07,42.96,39.04,3.11,[6,58.56]],[4,9.07,46.07,39.04,3.11,[6,68.69]],[4,51.89,33.62,39.04,3.11,[7,4.91]],[4,51.89,36.73,39.04,3.11,[7,19.04]],[4,51.89,39.84,39.04,3.11,[7,29.17]],[4,51.89,42.96,39.04,3.11,[7,39.29]],[4,51.89,46.07,39.04,3.11,[7,51.02]],[4,9.07,51.5,81.86,4.2,8],[4,9.07,58.01,39.04,3.11,[8,23.61]],[4,9.07,61.12,39.04,3.11,[8,40.19]],[4,9.07,64.24,39.04,3.11,[8,54.84]],[4,9.07,67.35,39.04,3.11,[9,6.86]],[4,9.07,70.47,39.04,3.11,[9,27.85]],[4,9.07,73.58,39.04,3.11,[9,48.83]],[4,51.89,58.01,39.04,3.11,[10,9.27]],[4,51.89,61.12,39.04,3.11,[10,28.93]],[4,51.89,64.24,39.04,3.11,[10,48.59]],[4,51.89,67.35,39.04,3.11,[11,6.86]],[4,51.89,70.47,39.04,3.11,[11,24.79]],[4,51.89,73.58,39.04,3.11,[11,44.45]],[5,9.07,2.26,30.76,2.6,4],[5,9.07,21.82,81.86,5.67,[8,23.61]],[5,9.07,28.2,81.86,5.67,[10,9.27]],[5,9.07,34.59,81.86,5.67,[10,28.93]],[5,9.07,40.98,81.86,5.67,[10,48.59]],[5,9.07,47.36,81.86,5.67,[11,6.86]],[5,9.07,53.75,81.86,5.67,[11,24.79]],[5,9.07,60.14,81.86,5.85,[11,44.45]],[6,9.07,2.26,30.76,2.6,4],[6,16.12,32.76,74.81,2.6,[9,6.86]],[6,16.12,42.89,74.81,2.6,[8,23.61]],[6,16.12,53.02,74.81,2.6,[9,27.85]],[6,16.12,67.15,74.81,2.6,[9,27.85]],[6,16.12,77.28,74.81,2.6,[9,27.85]],[7,9.07,2.26,30.76,2.6,4],[7,16.12,13.5,74.81,2.6,[9,27.85]],[7,16.12,27.63,74.81,2.6,[9,6.86]],[7,16.12,37.76,74.81,2.6,[9,6.86]],[7,16.12,47.89,74.81,2.6,[9,6.86]],[7,21.79,64.95,66.25,2.6,[9,6.86]],[8,9.07,2.26,30.76,2.6,4],[8,55.93,2.26,35,2.6,5],[9,9.07,2.26,30.76,2.6,4],[9,55.93,2.26,35,2.6,5],[10,9.07,2.26,30.76,2.6,4],[10,55.93,2.26,35,2.6,5],[11,9.07,2.26,30.76,2.6,4],[11,55.93,2.26,35,2.6,5],[12,9.07,64.08,81.86,17.09,"https://www.altusedu.com.br/radar-vendedor-rico-pro"]];
+    const ICONE_TELA_CHEIA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+    const ICONE_SAIR_TELA_CHEIA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+    let pbMontado = false;
+
+    function abrirPlaybook() {
+      atualizarBotaoTelaPlaybook();
+      const box = document.getElementById('pb-paginas');
+      if (!box || pbMontado) return;
+      pbMontado = true;
+      const marca = usuarioEmail ? 'Licenciado para ' + usuarioEmail + ' | Grupo Altus Educacional' : 'Grupo Altus Educacional';
+      for (let n = 1; n <= PB_TOTAL; n++) {
+        const pg = document.createElement('div');
+        pg.className = 'pb-pg';
+        pg.id = 'pb-pg-' + n;
+        pg.dataset.n = n;
+        const img = document.createElement('img');
+        img.src = 'ebook/pg/pg' + String(n).padStart(2, '0') + '.webp';
+        img.alt = 'Página ' + n + ' do playbook Meta Sem Mistério';
+        img.loading = n <= 2 ? 'eager' : 'lazy';
+        img.decoding = 'async';
+        img.draggable = false;
+        pg.appendChild(img);
+        PB_LINKS.filter(l => l[0] === n).forEach(l => {
+          const a = document.createElement('a');
+          a.className = 'pb-link';
+          a.style.cssText = 'left:' + l[1] + '%;top:' + l[2] + '%;width:' + l[3] + '%;height:' + l[4] + '%';
+          const dest = l[5];
+          if (typeof dest === 'string') {
+            a.href = dest; a.target = '_blank'; a.rel = 'noopener';
+            a.setAttribute('aria-label', 'Abrir ' + dest);
+          } else {
+            const [pag, y] = Array.isArray(dest) ? dest : [dest, 0];
+            a.href = '#';
+            a.setAttribute('aria-label', 'Ir para a página ' + pag);
+            a.addEventListener('click', ev => { ev.preventDefault(); irPaginaPlaybook(pag, y); });
+          }
+          pg.appendChild(a);
+        });
+        const m = document.createElement('div');
+        m.className = 'pb-marca';
+        m.textContent = marca;
+        pg.appendChild(m);
+        if (usuarioEmail) {
+          const mc = document.createElement('div');
+          mc.className = 'pb-marca-centro';
+          mc.textContent = usuarioEmail;
+          pg.appendChild(mc);
+        }
+        box.appendChild(pg);
+      }
+      if ('IntersectionObserver' in window) {
+        const pos = document.getElementById('pb-pos');
+        const obs = new IntersectionObserver(ents => {
+          ents.forEach(e => { if (e.isIntersecting && pos) pos.textContent = String(e.target.dataset.n).padStart(2, '0') + ' / ' + PB_TOTAL; });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        box.querySelectorAll('.pb-pg').forEach(p => obs.observe(p));
+      }
     }
+
+    // Na troca de usuário, remonta o leitor com a marca d'água do novo e-mail.
+    function limparPlaybook() {
+      const box = document.getElementById('pb-paginas');
+      if (box) box.innerHTML = '';
+      pbMontado = false;
+    }
+
+    // Zoom do leitor (o app bloqueia o zoom de pinça, então no celular a leitura amplia por aqui).
+    const PB_ZOOMS = [1, 1.5, 2, 2.5];
+    let pbZoomIdx = 0;
+    function zoomPlaybook(dir) {
+      const box = document.getElementById('pb-paginas');
+      if (!box) return;
+      const atual = parseInt(document.getElementById('pb-pos').textContent, 10) || 1;
+      pbZoomIdx = Math.max(0, Math.min(PB_ZOOMS.length - 1, pbZoomIdx + dir));
+      const z = PB_ZOOMS[pbZoomIdx];
+      box.style.width = (z * 100) + '%';
+      box.style.maxWidth = (860 * z) + 'px';
+      document.getElementById('pb-zoom-val').textContent = Math.round(z * 100) + '%';
+      const alvo = document.getElementById('pb-pg-' + atual);
+      if (alvo) alvo.scrollIntoView({ block: 'start' });
+    }
+
+    // Vai para a página n; y (% da altura da página) desce até o item certo, como um cartão do Tira-dúvidas.
+    function irPaginaPlaybook(n, y) {
+      abrirPlaybook();
+      const alvo = document.getElementById('pb-pg-' + n);
+      if (!alvo) return;
+      if (!y) { alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      const aba = document.getElementById('aba-dicas');
+      const tela = aba.classList.contains('pb-tela-cheia');
+      const topoFixo = tela ? (document.querySelector('.pb-barra').offsetHeight + 8) : 76;
+      const destino = alvo.getBoundingClientRect().top + alvo.offsetHeight * y / 100 - topoFixo;
+      if (tela) aba.scrollBy({ top: destino, behavior: 'smooth' });
+      else {
+        const rolo = document.querySelector('.main-content');
+        if (rolo && rolo.scrollHeight > rolo.clientHeight && getComputedStyle(rolo).overflowY !== 'visible') rolo.scrollBy({ top: destino, behavior: 'smooth' });
+        else window.scrollBy({ top: destino, behavior: 'smooth' });
+      }
+    }
+
+    // "O que é isso?" do planejador abre a explicação do campo direto no Tira-dúvidas.
+    function abrirExplicacaoCampo(campo) {
+      mostrarAba('dicas');
+      const alvo = { conversao: [9, 6.86], ticket: [9, 27.85] }[campo];
+      setTimeout(() => { if (alvo) irPaginaPlaybook(alvo[0], alvo[1]); }, 350);
+    }
+
+    function lendoPlaybook() {
+      const aba = document.getElementById('aba-dicas');
+      return !!(aba && aba.style.display !== 'none' && document.getElementById('app-main-content').style.display !== 'none');
+    }
+
+    // Tela cheia: a aba vira uma camada fixa sobre o app e, onde o navegador deixa,
+    // a página inteira entra em tela cheia (some a barra do navegador). No iPhone fica só a camada.
+    let pbTelaCheiaNativa = false;
+    function telaCheiaNativaAtiva() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+    function alternarTelaCheiaPlaybook() {
+      const aba = document.getElementById('aba-dicas');
+      if (!aba) return;
+      if (aba.classList.contains('pb-tela-cheia')) { sairTelaCheiaPlaybook(); return; }
+      aba.classList.add('pb-tela-cheia');
+      document.body.classList.add('pb-tela-cheia-aberta');
+      const raiz = document.documentElement;
+      const pedir = raiz.requestFullscreen || raiz.webkitRequestFullscreen;
+      if (pedir && (document.fullscreenEnabled || document.webkitFullscreenEnabled) && !telaCheiaNativaAtiva()) {
+        Promise.resolve(pedir.call(raiz)).then(() => { pbTelaCheiaNativa = true; }).catch(() => {});
+      }
+      atualizarBotaoTelaPlaybook();
+    }
+
+    function sairTelaCheiaPlaybook() {
+      const aba = document.getElementById('aba-dicas');
+      if (!aba || !aba.classList.contains('pb-tela-cheia')) return;
+      aba.classList.remove('pb-tela-cheia');
+      document.body.classList.remove('pb-tela-cheia-aberta');
+      if (pbTelaCheiaNativa && telaCheiaNativaAtiva()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      pbTelaCheiaNativa = false;
+      atualizarBotaoTelaPlaybook();
+    }
+
+    function atualizarBotaoTelaPlaybook() {
+      const btn = document.getElementById('pb-btn-tela');
+      const aba = document.getElementById('aba-dicas');
+      if (!btn || !aba) return;
+      const cheia = aba.classList.contains('pb-tela-cheia');
+      btn.innerHTML = cheia ? ICONE_SAIR_TELA_CHEIA : ICONE_TELA_CHEIA;
+      btn.setAttribute('aria-label', cheia ? 'Sair da tela cheia' : 'Tela cheia');
+      btn.title = cheia ? 'Sair da tela cheia' : 'Tela cheia';
+    }
+
+    // Esc no navegador sai da tela cheia nativa sem gerar keydown: fecha a camada junto.
+    function aoMudarTelaCheiaPlaybook() {
+      if (pbTelaCheiaNativa && !telaCheiaNativaAtiva()) { pbTelaCheiaNativa = false; sairTelaCheiaPlaybook(); }
+    }
+    document.addEventListener('fullscreenchange', aoMudarTelaCheiaPlaybook);
+    document.addEventListener('webkitfullscreenchange', aoMudarTelaCheiaPlaybook);
+
+    // Proteção do playbook contra impressão e captura de tela. No navegador não existe bloqueio total
+    // (o print do celular não pode ser impedido por um site); aqui o app dificulta no computador e
+    // a marca d'água com o e-mail do usuário identifica qualquer cópia.
+    let pbTimerProtecao = null;
+    function protegerPlaybook(ms) {
+      const aba = document.getElementById('aba-dicas');
+      if (!aba) return;
+      aba.classList.add('pb-protegido');
+      clearTimeout(pbTimerProtecao);
+      if (ms) pbTimerProtecao = setTimeout(() => aba.classList.remove('pb-protegido'), ms);
+    }
+    function liberarPlaybook() {
+      clearTimeout(pbTimerProtecao);
+      const aba = document.getElementById('aba-dicas');
+      if (aba) aba.classList.remove('pb-protegido');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!lendoPlaybook()) return;
+      if (e.key === 'Escape') { sairTelaCheiaPlaybook(); return; }
+      const k = (e.key || '').toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && (k === 'p' || k === 's')) { e.preventDefault(); protegerPlaybook(2500); }
+      // Atalhos de recorte do Mac (Cmd+Shift+3/4/5) e do Windows (Win+Shift+S)
+      if (e.metaKey && e.shiftKey && ['3', '4', '5', 's'].includes(k)) protegerPlaybook(4000);
+    }, true);
+    document.addEventListener('keyup', (e) => {
+      if (!lendoPlaybook() || e.key !== 'PrintScreen') return;
+      protegerPlaybook(4000);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('').catch(() => {});
+    });
+    window.addEventListener('beforeprint', () => { if (lendoPlaybook()) protegerPlaybook(); });
+    window.addEventListener('afterprint', liberarPlaybook);
+    // Ao sair da janela (ferramenta de recorte, troca de app), as páginas ficam borradas até voltar.
+    window.addEventListener('blur', () => { if (lendoPlaybook()) protegerPlaybook(); });
+    window.addEventListener('focus', liberarPlaybook);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { if (lendoPlaybook()) protegerPlaybook(); } else liberarPlaybook();
+    });
 
     // AUTENTICAÇÃO E LOGIN (PRIMEIRA TELA)
     document.addEventListener("DOMContentLoaded", () => {
@@ -1084,6 +1299,8 @@
     function bloquearAcesso() {
       localStorage.removeItem('rvr_session_token');
       usuarioEmail = "";
+      sairTelaCheiaPlaybook();
+      limparPlaybook();
       document.getElementById('auth-screen').style.display = 'flex';
       document.getElementById('app-main-content').style.display = 'none';
       const topbar = document.getElementById('mobile-topbar-header');
